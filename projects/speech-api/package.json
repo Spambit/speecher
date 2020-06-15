@@ -1,0 +1,10 @@
+{
+  "name": "speech-api",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "rxjs": "^6.5.5"
+  },
+  "dependencies": {
+    "tslib": "^1.10.0"
+  }
+}
