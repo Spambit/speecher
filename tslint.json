@@ -19,13 +19,13 @@
     "directive-selector": [
       true,
       "attribute",
-      "app",
+      "speecher",
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "app",
+      "speecher",
       "kebab-case"
     ],
     "eofline": true,

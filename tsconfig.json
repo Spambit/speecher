@@ -16,6 +16,12 @@
       "dom"
     ],
     "paths": {
+      "@services/*": [
+        "src/app/services/*"
+      ],
+      "@components/*": [
+        "src/app/components/*"
+      ],
       "speech-api": [
         "dist/speech-api/speech-api",
         "dist/speech-api"
