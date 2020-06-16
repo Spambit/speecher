@@ -9,7 +9,7 @@ export const SpeechRecognitionEvent =
 (window as any).SpeechRecognitionEvent || (window as any).webkitSpeechRecognitionEvent;
 
 @Injectable({ providedIn: 'root' })
-export class SpeechRecognizer {
+export class SpeecherRecognizer {
   private recognition: SpeechRecognition;
   private subject: Subject<SpeechResult>;
   private sentence: number;

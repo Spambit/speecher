@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SpeechRecognizer, SpeechEvents } from '@services/speech.service';
+import { SpeecherRecognizer, SpeechEvents } from '@services/speech.service';
 
 @Component({
   selector: 'speecher-home',
@@ -7,7 +7,7 @@ import { SpeechRecognizer, SpeechEvents } from '@services/speech.service';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  constructor(private recognizer: SpeechRecognizer) { }
+  constructor(private recognizer: SpeecherRecognizer) { }
   result = '';
   started = false;
   state = '';
