@@ -1,0 +1,19 @@
+@import './shared/shared.scss';
+body.speecher-light {
+  --navbar-item-text-focus-color: rgb(55, 58, 221);
+  --navbar-item-border-color: darkgray;
+  --navbar-item-text-color: #{$speecher-light-freeze};
+  --speecher-overlay-bg-color: #{$speecher-light-mania};
+  --speecher-main-bg-color: #{$speecher-light-smooth};
+  --speecher-search-border-color: #{$speecher-light-2d};
+  --speecher-sidebar-fg-color: #{$speecher-light-bed};
+  --speecher-sidebar-search-border-color: #{$speecher-light-tobe};
+  --speecher-sidebar-bg-color: #{$speecher-light-fire};
+  --speecher-sidebar-container-bg-color: #{$speecher-light-cristal};
+  --speecher-menu-header-fg-color: #{$speecher-light-scrible};
+  --speecher-sidebar-menu-decor-fg-color: #{$speecher-light-brick};
+  --speecher-sidebar-menu-fg-color: #{$speecher-light-shine};
+  --speecher-sidebar-menu-decor-bg-color: #{$speecher-light-brick-shadow};
+  --speecher-body-bg-color: #{$speecher-light-almo};
+  --speecher-sidebar-menu-focus-color: #{$speecher-light-tub};
+}

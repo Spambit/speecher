@@ -1,0 +1,65 @@
+
+@import './scrollbar.scss';
+@mixin desktop {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: 768px) and (max-width: 1023px) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media (max-width: 767px) {
+    @content;
+  }
+}
+
+.hide {
+  display: none !important;
+}
+
+$sm-device-gap-top: 90px;
+$lg-device-gap-top: 56px;
+$speecher-main-z-index: 98;
+$sidebar-overlay-z-index: 99;
+$sidebar-z-index: 100;
+$speecher-max-z-index: 1000;
+
+$speecher-dark-mania :  #292828;
+$speecher-dark-fire: #1d1d1d;
+$speecher-dark-almo: #1b1b1b;
+$speecher-dark-smooth: #3d3c3c;
+$speecher-dark-2d: #2d2d2d;
+$speecher-dark-bed: #bdbdbd;
+$speecher-dark-tobe: #2b2b2b;
+$speecher-dark-freeze: #d6d0d0;
+$speecher-dark-cristal: rgba(0, 0, 0, 0) ;
+$speecher-dark-scrible: #6c7b88;
+$speecher-dark-brick: #ee7e76;
+$speecher-dark-shine: #afaaaa;
+$speecher-dark-brick-shadow: #c24444;
+$speecher-green-pees:  #5cb85c;
+$speecher-yellow-bump: #e2d242;
+
+
+$speecher-light-mania :  #faf6f6;
+$speecher-light-fire: #fcf9f9;
+$speecher-light-almo: #a7a3a3;
+$speecher-light-smooth: #b9b0b0;
+$speecher-light-2d: #d4cece;
+$speecher-light-bed: #241818;
+$speecher-light-tobe: #d1cccc;
+$speecher-light-freeze: #1f1919;
+$speecher-light-cristal: rgba(0, 0, 0, 0) ;
+$speecher-light-scrible: #b1b6bb;
+$speecher-light-brick: #ee7e76;
+$speecher-light-shine: #6860b3;
+$speecher-light-brick-shadow: #c24444;
+$speecher-green-pees:  #5cb85c;
+$speecher-yellow-bump: #e2d242;
+
+$speecher-light-tub: #04010a;
