@@ -100,7 +100,22 @@ export class SpeecherRecognizer {
     this.recognition.lang = 'en-US';
     this.recognition.interimResults = false;
     this.recognition.maxAlternatives = 1;
-    this.recognition.continuous = true;
+    const punctuations = [
+      {
+        char: ',',
+        sound: 'comma',
+      },
+      {
+        char: '.',
+        sound: 'stop',
+      },
+    ];
+    const colors = ['blue', 'red'];
+    const grammar = '#JSGF V1.0; grammar colors; public <color> = ' + colors.join(' | ') + ' ;';
+    const speechRecognitionList = new SpeechGrammarList();
+    speechRecognitionList.addFromString(grammar, 1);
+    this.recognition.grammars = speechRecognitionList;
+
     this.recognition.addEventListener('end', e => this.didEndRecognizingSpeech(e));
     this.recognition.addEventListener('start', e => this.didStart(e));
     this.recognition.addEventListener('result', e => this.didRecognizedSpeech(e));
