@@ -6,7 +6,6 @@ import { NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
     selector: 'speecher-toast-accordian',
     templateUrl: 'accordian.component.html',
     styleUrls: ['accordian.component.scss'],
-    encapsulation: ViewEncapsulation.None
 })
 export class AccordianComponent extends TemplateWrapperBase {
 }
