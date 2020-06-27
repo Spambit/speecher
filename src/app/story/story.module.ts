@@ -5,6 +5,7 @@ import { NgModule } from '@angular/core';
 import { StoryComponent } from './story.component';
 import { RouterModule } from '@angular/router';
 import { ToastContainerComponent } from '@components/speecher-toast/speecher-toast.component';
+import { AccordianComponent } from '@components/accordian/accordian.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 
@@ -22,7 +23,7 @@ const routes = [{
     ],
     declarations: [
         StoryComponent,
-        ToastContainerComponent
+        ToastContainerComponent,
     ],
     exports: [
         StoryComponent,
