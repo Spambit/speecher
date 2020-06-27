@@ -15,8 +15,3 @@ button:active.focus,
 button.active.focus {
   outline: none;
 }
-
-div , button {
-  background:var(--speecher-sidebar-bg-color) !important;
-  color: var(--speecher-sidebar-fg-color) !important;
-}

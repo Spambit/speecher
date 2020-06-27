@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ToastService } from '@services/toast.service';
 
 @Component({
     selector: 'speecher-story',
@@ -6,4 +7,8 @@ import { Component } from '@angular/core';
     styleUrls: ['story.component.scss']
 })
 export class StoryComponent {
+  constructor(private toastService: ToastService){}
+  showToast() {
+    this.toastService.showSuccess();
+  }
 }
