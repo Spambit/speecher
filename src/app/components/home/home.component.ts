@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SpeecherRecognizer, SpeechEvents } from '@services/speech.service';
+import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'speecher-home',
@@ -11,6 +12,9 @@ export class HomeComponent implements OnInit {
   result = '';
   started = false;
   state = '';
+  icons = {
+    microfone: faMicrophone
+  };
   ngOnInit() {
     this.recognizer.events.subscribe(( { result, event, error }) => {
       if ( event === SpeechEvents.didStartListening ) {
@@ -35,6 +39,12 @@ export class HomeComponent implements OnInit {
     }
 
     this.recognizer.start(true);
+  }
+
+  micColor(){
+    const blue = getComputedStyle(document.documentElement).getPropertyValue('--blue');
+    const light = getComputedStyle(document.documentElement).getPropertyValue('--light');
+    return this.started ? blue  : light;
   }
 
   private stop() {

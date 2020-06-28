@@ -7,6 +7,7 @@ import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastContainerComponent } from '@components/speecher-toast/speecher-toast.component';
 import { AccordianComponent } from '@components/accordian/accordian.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { AccordianComponent } from '@components/accordian/accordian.component';
     BrowserModule,
     AppRoutingModule,
     NgbModule,
+    FontAwesomeModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
