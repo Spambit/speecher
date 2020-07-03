@@ -12,20 +12,15 @@ export const SpeechRecognitionEvent =
 export class SpeecherRecognizer {
   private recognition: SpeechRecognition;
   private subject: Subject<SpeechResult>;
-  private sentence: number;
   // tslint:disable-next-line: variable-name
   private _started: boolean;
   private set started(val) {
-    if (!val) {
-      this.sentence = 0;
-    }
     this._started = val;
   }
   private get started() {
     return this._started;
   }
   constructor() {
-    this.sentence = 0;
     this.subject = new Subject<SpeechResult>();
     this.recognition = new SpeechRecognition();
     this.configureSpeechRecognizer();
@@ -97,9 +92,9 @@ export class SpeecherRecognizer {
   }
 
   private configureSpeechRecognizer() {
-    this.recognition.lang = 'en-US';
-    this.recognition.interimResults = false;
+    this.recognition.lang = 'en-IN';
     this.recognition.maxAlternatives = 1;
+    this.recognition.interimResults = false;
     const punctuations = [
       {
         char: ',',
@@ -142,11 +137,9 @@ export class SpeecherRecognizer {
     // These also have getters so they can be accessed like arrays.
     // The second [0] returns the SpeechRecognitionAlternative at position 0.
     // We then return the transcript property of the SpeechRecognitionAlternative object
-    const speech = this.trimAndCapitalizeFirstLetter(event.results[this.sentence][0].transcript + '.');
-    const confidence = event.results[this.sentence][0].confidence;
-    if (this.recognition.continuous) {
-      this.sentence++;
-    }
+    const lastRecognisedResult = event.results[event.results.length - 1][0];
+    const speech = this.trimAndCapitalizeFirstLetter(lastRecognisedResult.transcript);
+    const confidence = lastRecognisedResult.confidence;
     this.subject.next({
       result: { speech, confidence },
       event: SpeechEvents.didReceiveResult,
