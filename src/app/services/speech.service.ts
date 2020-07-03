@@ -105,11 +105,14 @@ export class SpeecherRecognizer {
         sound: 'stop',
       },
     ];
+    /* add grammar if needed */
+    /*
     const colors = ['blue', 'red'];
     const grammar = '#JSGF V1.0; grammar colors; public <color> = ' + colors.join(' | ') + ' ;';
     const speechRecognitionList = new SpeechGrammarList();
     speechRecognitionList.addFromString(grammar, 1);
     this.recognition.grammars = speechRecognitionList;
+    */
 
     this.recognition.addEventListener('end', e => this.didEndRecognizingSpeech(e));
     this.recognition.addEventListener('start', e => this.didStart(e));
