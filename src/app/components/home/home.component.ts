@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { SpeecherRecognizer, SpeechEvents } from '@services/speech.service';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
+import { CommandService } from '@services/command.service';
+import { Filters } from '@services/filter.result';
 
 @Component({
   selector: 'speecher-home',
@@ -8,7 +10,7 @@ import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  constructor(private recognizer: SpeecherRecognizer) { }
+  constructor(private recognizer: SpeecherRecognizer, private commandService: CommandService) { }
   result = '';
   started = false;
   state = '';
@@ -24,7 +26,7 @@ export class HomeComponent implements OnInit {
         this.started = false;
       }
       if (event === SpeechEvents.didReceiveResult ) {
-        this.result += ' ' + result.speech;
+        this.result += this.correctPunctuation(result.speech);
       }
     }, (err) => {
       console.error(`Speecher error: ${err}`);
@@ -32,6 +34,14 @@ export class HomeComponent implements OnInit {
       this.stop();
     });
   }
+  private correctPunctuation(str: string): string {
+    const filteredResult = this.commandService.filter(str, [Filters.comma, Filters.dot]);
+    if (filteredResult.length !== 0) {
+      return this.commandService.process(filteredResult, str);
+    }
+    return str;
+  }
+
   toggleStart() {
     if ( this.started ) {
       this.stop();
