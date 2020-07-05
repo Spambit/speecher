@@ -8,11 +8,13 @@ export class CommandService {
   readonly commands: ICommand[] = [
     { id: Filters.start, names: ['command'] },
     { id: Filters.comma, names: ['coma', 'comma'], replaceWith: ', ' },
-    { id: Filters.createnote, names: ['create note'] },
+    { id: Filters.createnote, names: ['create note', 'create a note', 'create a note of it'] },
     { id: Filters.dot, names: ['dot'], replaceWith: '. ' },
+    { id: Filters.newpara, names: ['new para', 'new paida'], replaceWith: '\n\n\t\t' },
   ];
   constructor() {}
   filter(str: string, filters: Filters[] = []): IFilterResult[] {
+    str = str.toLowerCase();
     const filteredCommands =
       filters.length === 0
         ? this.commands
@@ -31,6 +33,7 @@ export class CommandService {
   }
 
   process(filterResult: IFilterResult[], str: string): string {
+    str = str.toLowerCase();
     for (const result of filterResult) {
       const regexp = new RegExp(result.selectedname, 'g');
       str = str.replace(regexp, result.command.replaceWith || '');
@@ -39,6 +42,7 @@ export class CommandService {
   }
 
   private findAll(str: string, search: string): { start: number, end: number }[] {
+    str = str.toLowerCase();
     const regexp = new RegExp(search, 'g');
     let match;
     const arr: {start: number, end: number}[] = [];

@@ -1,11 +1,11 @@
 <div class='home-nav'>
-  <small>11 mins ago</small>
+  <small>{{today}}</small>
   <button type="button" class="btn bg-transparent" (click)='toggleStart()'>
     <fa-icon [style.color]="micColor()" [icon]="icons.microfone"></fa-icon>
   </button>
 </div>
 <section class='home-speech'>
-  <p>
+  <textarea spellcheck='false' class="form-control bg-transparent">
     {{result}}
-  </p>
+  </textarea>
 </section>

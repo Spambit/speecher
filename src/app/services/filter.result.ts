@@ -14,5 +14,6 @@ export enum Filters {
   comma,
   createnote,
   start,
-  dot
+  dot,
+  newpara
 }

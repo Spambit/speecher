@@ -56,9 +56,40 @@ $card-cap-color:                    $gray-200;
 
 //close
 $close-color:                       $gray-300 ;
+
+//textarea
+$textarea-color:                    $gray-300 ;
+
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
 
 body {
   position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+textarea:hover,
+input:hover,
+textarea:active,
+input:active,
+textarea:focus,
+input:focus,
+button:focus,
+button:active,
+button:hover,
+label:focus,
+.btn:active,
+.btn.active
+{
+    outline:0px !important;
+    -webkit-appearance:none;
+    box-shadow: none !important;
+}
+
+$speecher-nav-bar-height: 44px;
