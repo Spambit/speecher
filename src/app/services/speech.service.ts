@@ -11,7 +11,7 @@ export const SpeechRecognitionEvent =
 @Injectable({ providedIn: 'root' })
 export class SpeecherRecognizer {
   private recognition: SpeechRecognition;
-  private subject: Subject<SpeechResult>;
+  private subject: Subject<ISpeechResult>;
   // tslint:disable-next-line: variable-name
   private _started: boolean;
   private set started(val) {
@@ -21,7 +21,7 @@ export class SpeecherRecognizer {
     return this._started;
   }
   constructor() {
-    this.subject = new Subject<SpeechResult>();
+    this.subject = new Subject<ISpeechResult>();
     this.recognition = new SpeechRecognition();
     this.configureSpeechRecognizer();
   }
@@ -94,25 +94,7 @@ export class SpeecherRecognizer {
   private configureSpeechRecognizer() {
     this.recognition.lang = 'en-IN';
     this.recognition.maxAlternatives = 1;
-    this.recognition.interimResults = false;
-    const punctuations = [
-      {
-        char: ',',
-        sound: 'comma',
-      },
-      {
-        char: '.',
-        sound: 'stop',
-      },
-    ];
-    /* add grammar if needed */
-    /*
-    const colors = ['blue', 'red'];
-    const grammar = '#JSGF V1.0; grammar colors; public <color> = ' + colors.join(' | ') + ' ;';
-    const speechRecognitionList = new SpeechGrammarList();
-    speechRecognitionList.addFromString(grammar, 1);
-    this.recognition.grammars = speechRecognitionList;
-    */
+    this.recognition.interimResults = true;
 
     this.recognition.addEventListener('end', e => this.didEndRecognizingSpeech(e));
     this.recognition.addEventListener('start', e => this.didStart(e));
@@ -140,11 +122,13 @@ export class SpeecherRecognizer {
     // These also have getters so they can be accessed like arrays.
     // The second [0] returns the SpeechRecognitionAlternative at position 0.
     // We then return the transcript property of the SpeechRecognitionAlternative object
-    const lastRecognisedResult = event.results[event.results.length - 1][0];
+    const speechResult = event.results[event.results.length - 1] as SpeechRecognitionResult;
+    const lastRecognisedResult = speechResult[0] as SpeechRecognitionAlternative;
     const speech = this.trimAndCapitalizeFirstLetter(lastRecognisedResult.transcript);
     const confidence = lastRecognisedResult.confidence;
+    const isFinal = speechResult.isFinal;
     this.subject.next({
-      result: { speech, confidence },
+      result: { speech, confidence, isFinal },
       event: SpeechEvents.didReceiveResult,
     });
   }
@@ -169,8 +153,8 @@ export class SpeecherRecognizer {
   }
 }
 
-export interface SpeechResult {
-  result?: { speech: string; confidence: any };
+export interface ISpeechResult {
+  result?: { speech: string; confidence: any, isFinal: boolean };
   error?: { reason: string; original: any };
   event: SpeechEvents;
 }

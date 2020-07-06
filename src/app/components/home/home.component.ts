@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { SpeecherRecognizer, SpeechEvents } from '@services/speech.service';
+import { SpeecherRecognizer, SpeechEvents, ISpeechResult } from '@services/speech.service';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import { CommandService } from '@services/command.service';
 import { Filters } from '@services/filter.result';
+import { LocalStorageService, StoreType } from '@services/store.service';
+import { DateService } from '@services/date.service';
 
 @Component({
   selector: 'speecher-home',
@@ -12,9 +14,11 @@ import { Filters } from '@services/filter.result';
 export class HomeComponent implements OnInit {
   constructor(
     private recognizer: SpeecherRecognizer,
-    private commandService: CommandService
+    private commandService: CommandService,
+    private storeService: LocalStorageService,
+    private dateService: DateService
   ) {}
-  result = '';
+  result = { final: '', intrim: '' };
   started = false;
   state = '';
   icons = {
@@ -30,7 +34,7 @@ export class HomeComponent implements OnInit {
           this.started = false;
         }
         if (event === SpeechEvents.didReceiveResult) {
-          this.result += ' ' + this.correctPunctuation(result.speech);
+          this.processResult(result);
         }
       },
       (err) => {
@@ -40,11 +44,40 @@ export class HomeComponent implements OnInit {
       }
     );
   }
+
+  private processResult(result: {
+    speech: string;
+    confidence: any;
+    isFinal: boolean;
+  }) {
+    const intrimResult = this.result.final + ' ' + result.speech;
+    if (!result.isFinal) {
+      if (intrimResult.length > this.result.intrim.length){
+        this.result.intrim = intrimResult;
+      }
+      return;
+    }
+    this.result.intrim = '';
+    this.result.final += ' ' + this.correctPunctuation(result.speech);
+    this.storeService
+      .store(
+        {
+          note: this.result.final,
+          when: this.dateService.now,
+        },
+        this.today,
+        StoreType.note
+      )
+      .then((data) => {
+        console.log('Data stored.');
+      });
+  }
+
   private correctPunctuation(str: string): string {
     const filteredResult = this.commandService.filter(str, [
       Filters.comma,
       Filters.dot,
-      Filters.newpara
+      Filters.newpara,
     ]);
     if (filteredResult.length !== 0) {
       return this.commandService.process(filteredResult, str);
@@ -76,18 +109,6 @@ export class HomeComponent implements OnInit {
   }
 
   get today() {
-    const today = new Date();
-    let dd: any = today.getDate();
-
-    let mm: any = today.getMonth() + 1;
-    const yyyy = '' + today.getFullYear();
-    if (dd < 10) {
-      dd = '0' + dd;
-    }
-
-    if (mm < 10) {
-      mm = '0' + mm;
-    }
-    return `${dd}-${mm}-${yyyy}`;
+    return this.dateService.today;
   }
 }
