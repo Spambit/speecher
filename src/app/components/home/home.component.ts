@@ -5,7 +5,9 @@ import { CommandService } from '@services/command.service';
 import { Filters } from '@services/filter.result';
 import { LocalStorageService, StoreType } from '@services/store.service';
 import { DateService } from '@services/date.service';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, first } from 'rxjs/operators';
+import { DriveService } from '@services/drive.service';
+import { drive } from 'src/app/conf/conf.drive.keys';
 
 @Component({
   selector: 'speecher-home',
@@ -17,7 +19,8 @@ export class HomeComponent implements OnInit {
     private recognizer: SpeecherRecognizer,
     private commandService: CommandService,
     private storeService: LocalStorageService,
-    private dateService: DateService
+    private dateService: DateService,
+    private driveService: DriveService
   ) {}
   result = { final: '', intrim: '' };
   started = false;
@@ -87,6 +90,19 @@ export class HomeComponent implements OnInit {
   }
 
   toggleStart() {
+    if (this.started){
+      this.driveService.logout().pipe(first()).subscribe(loggedIn => {
+        if (!loggedIn) {
+          console.log('logged out');
+        }
+      });
+      this.started = false;
+      return;
+    }
+    this.started = true;
+    this.driveService.createFolder('Speecher-Nice-Folder').catch(console.error);
+    return;
+
     if (this.started) {
       this.stop();
       return;

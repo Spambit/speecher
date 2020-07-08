@@ -1,6 +1,6 @@
-export * from "./object.util";
+export * from './object.util';
 
 export type anyfn = (...args: any[]) => any;
-export function defer(fn: anyfn) {
-  setTimeout(fn, 0);
-}
+export const defer = (fn: anyfn) => {
+  window.setTimeout(fn, 0);
+};
