@@ -46,6 +46,7 @@ export class SpeecherRecognizer {
 
   private didEndRecognizingSpeech(event) {
     // Fired when the speech this.recognition service has disconnected.
+    this.started = false;
     this.subject.next({
       event: SpeechEvents.didStopListening,
     });
@@ -86,6 +87,7 @@ export class SpeecherRecognizer {
   private didStart(event) {
     // Fired when the speech recognition service has begun listening to
     // incoming audio with intent to recognize grammars associated with the current SpeechRecognition.
+    this.started = true;
     this.subject.next({
       event: SpeechEvents.didStartListening,
     });
@@ -95,6 +97,7 @@ export class SpeecherRecognizer {
     this.recognition.lang = 'en-IN';
     this.recognition.maxAlternatives = 1;
     this.recognition.interimResults = true;
+    this.recognition.continuous = true;
 
     this.recognition.addEventListener('end', e => this.didEndRecognizingSpeech(e));
     this.recognition.addEventListener('start', e => this.didStart(e));
@@ -137,9 +140,7 @@ export class SpeecherRecognizer {
     return this.subject;
   }
 
-  start(continuous = false) {
-    this.recognition.continuous = continuous;
-    this.started = true;
+  start() {
     this.recognition.start();
   }
 

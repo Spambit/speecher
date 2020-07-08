@@ -5,6 +5,7 @@ import { CommandService } from '@services/command.service';
 import { Filters } from '@services/filter.result';
 import { LocalStorageService, StoreType } from '@services/store.service';
 import { DateService } from '@services/date.service';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'speecher-home',
@@ -91,7 +92,7 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    this.recognizer.start(true);
+    this.recognizer.start();
   }
 
   micColor() {
