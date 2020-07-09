@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { SpeecherRecognizer, SpeechEvents, ISpeechResult } from '@services/speech.service';
+import {
+  SpeecherRecognizer,
+  SpeechEvents,
+} from '@services/speech.service';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import { CommandService } from '@services/command.service';
-import { Filters } from '@services/filter.result';
+import { Filters, CreateNote, Note } from '@services/filter.result';
 import { LocalStorageService, StoreType } from '@services/store.service';
 import { DateService } from '@services/date.service';
-import { debounceTime, first } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { DriveService } from '@services/drive.service';
-import { drive } from 'src/app/conf/conf.drive.keys';
 
 @Component({
   selector: 'speecher-home',
@@ -24,10 +26,11 @@ export class HomeComponent implements OnInit {
   ) {}
   result = { final: '', intrim: '' };
   started = false;
-  state = '';
   icons = {
     microfone: faMicrophone,
   };
+  private noteNow?: Note;
+  private gdriveParentFolderId = '';
   ngOnInit() {
     this.recognizer.events.subscribe(
       ({ result, event, error }) => {
@@ -49,6 +52,10 @@ export class HomeComponent implements OnInit {
     );
   }
 
+  private findFolder({ id = '' }): Promise<boolean> {
+    return this.driveService.findFile({ id });
+  }
+
   private processResult(result: {
     speech: string;
     confidence: any;
@@ -56,51 +63,99 @@ export class HomeComponent implements OnInit {
   }) {
     const intrimResult = this.result.final + ' ' + result.speech;
     if (!result.isFinal) {
-      if (intrimResult.length > this.result.intrim.length){
+      if (intrimResult.length > this.result.intrim.length) {
         this.result.intrim = intrimResult;
       }
       return;
     }
     this.result.intrim = '';
-    this.result.final += ' ' + this.correctPunctuation(result.speech);
+    const processedResult = this.processCommands(result.speech);
+    this.result.final += ' ' + processedResult.result;
+    this.noteNow = CreateNote({
+      note: this.result.final,
+      timeNow: this.dateService.now,
+      driveParentFolderId: this.gdriveParentFolderId,
+      name: this.today,
+    }),
     this.storeService
       .store(
-        {
-          note: this.result.final,
-          when: this.dateService.now,
-        },
+        this.noteNow,
         this.today,
         StoreType.note
       )
       .then((data) => {
         console.log('Data stored.');
       });
+    if (processedResult.shouldSaveNote) {
+        this.saveNoteInGoogleDrive();
+    }
   }
 
-  private correctPunctuation(str: string): string {
-    const filteredResult = this.commandService.filter(str, [
+  private processCommands(str: string): { result: string, shouldSaveNote: boolean} {
+    let result = '';
+    let shouldSaveNote = false;
+    const filteredResults = this.commandService.filter(str, [
       Filters.comma,
       Filters.dot,
       Filters.newpara,
+      Filters.savenote,
     ]);
-    if (filteredResult.length !== 0) {
-      return this.commandService.process(filteredResult, str);
+    if (filteredResults.length !== 0) {
+      result = this.commandService.process(filteredResults, str);
+      shouldSaveNote = filteredResults.some(
+        (filterResult) => filterResult.command.id === Filters.savenote
+      );
     }
-    return str;
+    return { result, shouldSaveNote};
+  }
+
+  private saveNoteInGoogleDrive(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.findFolder({ id: this.gdriveParentFolderId }).then((found) => {
+        if (!found) {
+          return this.driveService
+            .createBaseFolder()
+            .then((ret) => {
+              this.saveNoteInternal(this.gdriveParentFolderId).then(resolve).catch(reject);
+            })
+            .catch(reject);
+        }
+        return this.saveNoteInternal(this.gdriveParentFolderId).then(resolve).catch(reject);
+      });
+    });
+  }
+
+  private saveNoteInternal(parentFolderId: string): Promise<void> {
+    return this.driveService
+      .createFile({
+        withContent: this.result.final,
+        name: this.today,
+        folderId: parentFolderId
+      })
+      .then((res) => Promise.resolve())
+      .catch(Promise.reject);
   }
 
   toggleStart() {
-    if (this.started){
-      this.driveService.logout().pipe(first()).subscribe(loggedIn => {
-        if (!loggedIn) {
-          console.log('logged out');
-        }
-      });
+    if (this.started) {
+      this.driveService
+        .logout()
+        .pipe(first())
+        .subscribe((loggedIn) => {
+          if (!loggedIn) {
+            console.log('logged out');
+          }
+        });
       this.started = false;
       return;
     }
     this.started = true;
-    this.driveService.createFolder('Speecher-Nice-Folder').catch(console.error);
+    this.driveService
+      .createBaseFolder('Speecher-Data-Folder')
+      .then((ret) => {
+        this.gdriveParentFolderId = ret.id;
+      })
+      .catch(console.error);
     return;
 
     if (this.started) {
