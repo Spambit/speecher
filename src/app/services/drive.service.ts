@@ -100,11 +100,11 @@ export class DriveService {
     return this.loginService.logout();
   }
 
-  createFile({ name, withContent, folderId }: {name: string, withContent: string, folderId: string}): Promise<void> {
-    return this.createFileWithJSONContent({name, data : withContent, folderId});
+  createFile({ name, withContent, folderId }: {name: string, withContent: any, folderId: string}): Promise<void> {
+    return this.createFileWithJSONContent({name, data : JSON.stringify(withContent), folderId});
   }
 
-  private createFileWithJSONContent({ name, data, folderId }: {name: string, data: any, folderId: string}): Promise<void> {
+  private createFileWithJSONContent({ name, data, folderId }: {name: string, data: string, folderId: string}): Promise<void> {
     return new Promise((resolve, reject) => {
       const boundary = '-------speecher-boundary';
       const delimiter = '\r\n--' + boundary + '\r\n';
@@ -126,7 +126,7 @@ export class DriveService {
         'Content-Type: ' +
         contentType +
         '\r\n\r\n' +
-        JSON.stringify(data) +
+        data +
         closeDelim;
 
       const request = gapi.client.request({

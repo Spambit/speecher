@@ -10,30 +10,14 @@ export interface ICommand {
   replaceWith?: string;
 }
 
-export interface Note {
+export class Note {
   note: string;
   when: string;
   drive: {
-    dest: string;
+    destFolderId: string;
   };
   name: string;
 }
-
-export const CreateNote = ({
-  note = '',
-  name = '',
-  timeNow = '',
-  driveParentFolderId = '',
-}) => {
-  return {
-    note,
-    when: timeNow,
-    drive: {
-      dest: driveParentFolderId,
-    },
-    name,
-  };
-};
 
 export enum Filters {
   comma,

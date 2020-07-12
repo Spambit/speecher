@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import * as forage from 'localforage';
+import { DateService } from './date.service';
 
 @Injectable({ providedIn: 'root' })
 export class LocalStorageService {
   private stores = {} as {
     string: LocalForage;
   };
-  constructor() {
+  constructor(private dateService: DateService) {
     const allTypes = StoreType.allNames();
     for (const type of allTypes) {
       this.stores[type] = this.createDb(type);
@@ -43,6 +44,15 @@ export class LocalStorageService {
     string, key: string, type: StoreType) {
     const store = this.storeOf(type);
     return store.setItem(key, data);
+  }
+
+  storeTodaysNote(data: any): Promise<any>{
+    return this.store(data, this.dateService.today, StoreType.note);
+  }
+
+
+  todaysNote(): Promise<any> {
+    return this.storeOf(StoreType.note).getItem(this.dateService.today);
   }
 }
 

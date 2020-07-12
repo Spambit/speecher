@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { SpeecherRecognizer, SpeechEvents } from '@services/speech.service';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import { CommandService } from '@services/command.service';
-import { Filters, CreateNote, Note } from '@services/filter.result';
-import { LocalStorageService, StoreType } from '@services/store.service';
+import { Filters, Note } from '@services/filter.result';
+import { LocalStorageService } from '@services/store.service';
 import { DateService } from '@services/date.service';
 import { DriveService } from '@services/drive.service';
 import { ToastService } from '@services/toast.service';
 import { first } from 'rxjs/operators';
+import { createInstanceOfClass } from 'src/app/utils';
 
 @Component({
   selector: 'speecher-home',
@@ -23,7 +24,7 @@ export class CreateStoryComponent implements OnInit {
     private driveService: DriveService,
     private toastService: ToastService
   ) {}
-  result = { final: 'Ok this is final result save note', intrim: '' };
+  result = { final: 'Ok this is final result.', intrim: '' };
   started = false;
   icons = {
     microfone: faMicrophone,
@@ -71,19 +72,24 @@ export class CreateStoryComponent implements OnInit {
     this.result.intrim = '';
     const processedResult = this.processCommands(result.speech);
     this.result.final += ' ' + processedResult.result;
-    (this.noteNow = CreateNote({
-      note: this.result.final,
-      timeNow: this.dateService.now,
-      driveParentFolderId: this.gdriveParentFolderId,
+    this.noteNow = createInstanceOfClass(Note, {
       name: this.today,
-    })),
-      this.storeService
-        .store(this.noteNow, this.today, StoreType.note)
-        .then((data) => {
-          console.log('Data stored.');
-        });
+      note: this.result.final,
+      when: this.dateService.now,
+      drive: {
+        destFolderId: this.gdriveParentFolderId,
+      },
+    });
+    this.storeService
+      .storeTodaysNote(this.noteNow)
+      .catch(console.error)
+      .then((data) => {
+        console.log('Data stored.');
+      });
     if (processedResult.shouldSaveNote) {
-      this.saveNoteInGoogleDrive().then(() => console.log('Note saved in drive')).catch(console.error);
+      this.saveNoteInGoogleDrive()
+        .then(() => console.log('Note saved in drive'))
+        .catch(console.error);
     }
     if (processedResult.shouldShowCreateWordPanel) {
       this.toggleCreateWordPanel();
@@ -110,7 +116,7 @@ export class CreateStoryComponent implements OnInit {
       Filters.dot,
       Filters.newpara,
       Filters.savenote,
-      Filters.createword
+      Filters.createword,
     ]);
     if (filteredResults.length !== 0) {
       result = this.commandService.process(filteredResults, str);
@@ -140,9 +146,9 @@ export class CreateStoryComponent implements OnInit {
             .catch(reject);
         }
         console.log('found');
-        // return this.saveNoteInternal(this.gdriveParentFolderId)
-        //   .then(resolve)
-        //   .catch(reject);
+        return this.saveNoteInternal(this.gdriveParentFolderId)
+          .then(resolve)
+          .catch(reject);
       });
     });
   }
@@ -150,7 +156,7 @@ export class CreateStoryComponent implements OnInit {
   private saveNoteInternal(parentFolderId: string): Promise<void> {
     return this.driveService
       .createFile({
-        withContent: this.result.final,
+        withContent: JSON.stringify(this.noteNow),
         name: this.today,
         folderId: parentFolderId,
       })
@@ -173,7 +179,11 @@ export class CreateStoryComponent implements OnInit {
     }
 
     this.started = true;
-    this.saveNoteInGoogleDrive().then(() => console.log('Note saved in drive')).catch(console.error);
+    this.processResult({
+      speech: `Ok that's all. save note`,
+      confidence: 0.09,
+      isFinal: true,
+    });
     return;
 
     if (this.started) {
