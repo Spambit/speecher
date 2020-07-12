@@ -1,7 +1,5 @@
 import {
   Component,
-  ContentChild,
-  ViewChild,
   TemplateRef,
   OnInit,
   ViewContainerRef,
@@ -12,8 +10,8 @@ import { AccordianComponent } from '@components/accordian/accordian.component';
 
 @Component({
   selector: 'speecher-story',
-  templateUrl: 'story.component.html',
-  styleUrls: ['story.component.scss'],
+  templateUrl: 'read.component.html',
+  styleUrls: ['read.component.scss'],
 })
 export class StoryComponent implements OnInit {
   private toastBody: TemplateRef<any>;

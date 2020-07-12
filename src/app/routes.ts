@@ -1,6 +1,4 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from '@components/home/home.component';
-import { StoryModule } from './story/story.module';
 
 export const names = {
   home: 'home',
@@ -20,12 +18,12 @@ export const routes: Routes = [
   },
   {
     path: names.home,
-    component: HomeComponent,
     pathMatch: 'full',
+    loadChildren: () => import('./modules/create/create.module').then(m => m.SpeecherStoryCreationModule),
   },
   {
     path: names.story,
     pathMatch: 'full',
-    loadChildren: () => import('./story/story.module').then(m => m.StoryModule),
+    loadChildren: () => import('./modules/read/read.module').then(m => m.SpeecherStoryReadingModule),
   }
 ];

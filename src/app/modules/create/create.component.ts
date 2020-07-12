@@ -1,28 +1,27 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  SpeecherRecognizer,
-  SpeechEvents,
-} from '@services/speech.service';
+import { SpeecherRecognizer, SpeechEvents } from '@services/speech.service';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import { CommandService } from '@services/command.service';
 import { Filters, CreateNote, Note } from '@services/filter.result';
 import { LocalStorageService, StoreType } from '@services/store.service';
 import { DateService } from '@services/date.service';
-import { first } from 'rxjs/operators';
 import { DriveService } from '@services/drive.service';
+import { ToastService } from '@services/toast.service';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'speecher-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+  templateUrl: './create.component.html',
+  styleUrls: ['./create.component.scss'],
 })
-export class HomeComponent implements OnInit {
+export class CreateStoryComponent implements OnInit {
   constructor(
     private recognizer: SpeecherRecognizer,
     private commandService: CommandService,
     private storeService: LocalStorageService,
     private dateService: DateService,
-    private driveService: DriveService
+    private driveService: DriveService,
+    private toastService: ToastService
   ) {}
   result = { final: '', intrim: '' };
   started = false;
@@ -31,6 +30,7 @@ export class HomeComponent implements OnInit {
   };
   private noteNow?: Note;
   private gdriveParentFolderId = '';
+  createWordPanelVisible = false;
   ngOnInit() {
     this.recognizer.events.subscribe(
       ({ result, event, error }) => {
@@ -71,42 +71,57 @@ export class HomeComponent implements OnInit {
     this.result.intrim = '';
     const processedResult = this.processCommands(result.speech);
     this.result.final += ' ' + processedResult.result;
-    this.noteNow = CreateNote({
+    (this.noteNow = CreateNote({
       note: this.result.final,
       timeNow: this.dateService.now,
       driveParentFolderId: this.gdriveParentFolderId,
       name: this.today,
-    }),
-    this.storeService
-      .store(
-        this.noteNow,
-        this.today,
-        StoreType.note
-      )
-      .then((data) => {
-        console.log('Data stored.');
-      });
+    })),
+      this.storeService
+        .store(this.noteNow, this.today, StoreType.note)
+        .then((data) => {
+          console.log('Data stored.');
+        });
     if (processedResult.shouldSaveNote) {
-        this.saveNoteInGoogleDrive();
+      this.saveNoteInGoogleDrive();
+    }
+    if (processedResult.shouldShowCreateWordPanel) {
+      this.toggleCreateWordPanel();
     }
   }
 
-  private processCommands(str: string): { result: string, shouldSaveNote: boolean} {
+  private toggleCreateWordPanel() {
+    this.createWordPanelVisible = !this.createWordPanelVisible;
+    this.toastService.show('Test');
+  }
+
+  private processCommands(
+    str: string
+  ): {
+    result: string;
+    shouldSaveNote: boolean;
+    shouldShowCreateWordPanel: boolean;
+  } {
     let result = '';
     let shouldSaveNote = false;
+    let shouldShowCreateWordPanel = false;
     const filteredResults = this.commandService.filter(str, [
       Filters.comma,
       Filters.dot,
       Filters.newpara,
       Filters.savenote,
+      Filters.createword
     ]);
     if (filteredResults.length !== 0) {
       result = this.commandService.process(filteredResults, str);
       shouldSaveNote = filteredResults.some(
         (filterResult) => filterResult.command.id === Filters.savenote
       );
+      shouldShowCreateWordPanel = filteredResults.some(
+        (filterResult) => filterResult.command.id === Filters.createword
+      );
     }
-    return { result, shouldSaveNote};
+    return { result, shouldSaveNote, shouldShowCreateWordPanel };
   }
 
   private saveNoteInGoogleDrive(): Promise<void> {
@@ -116,11 +131,15 @@ export class HomeComponent implements OnInit {
           return this.driveService
             .createBaseFolder()
             .then((ret) => {
-              this.saveNoteInternal(this.gdriveParentFolderId).then(resolve).catch(reject);
+              this.saveNoteInternal(this.gdriveParentFolderId)
+                .then(resolve)
+                .catch(reject);
             })
             .catch(reject);
         }
-        return this.saveNoteInternal(this.gdriveParentFolderId).then(resolve).catch(reject);
+        return this.saveNoteInternal(this.gdriveParentFolderId)
+          .then(resolve)
+          .catch(reject);
       });
     });
   }
@@ -130,7 +149,7 @@ export class HomeComponent implements OnInit {
       .createFile({
         withContent: this.result.final,
         name: this.today,
-        folderId: parentFolderId
+        folderId: parentFolderId,
       })
       .then((res) => Promise.resolve())
       .catch(Promise.reject);
@@ -149,6 +168,7 @@ export class HomeComponent implements OnInit {
       this.started = false;
       return;
     }
+
     this.started = true;
     this.driveService
       .createBaseFolder('Speecher-Data-Folder')

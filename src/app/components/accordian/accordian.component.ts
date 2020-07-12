@@ -1,6 +1,5 @@
-import { Component, ViewEncapsulation, ViewChild, OnInit, AfterViewChecked, AfterViewInit, ContentChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { TemplateWrapperBase } from '@services/template.service';
-import { NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'speecher-toast-accordian',

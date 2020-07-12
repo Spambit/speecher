@@ -41,4 +41,5 @@ export enum Filters {
   start,
   dot,
   newpara,
+  createword
 }

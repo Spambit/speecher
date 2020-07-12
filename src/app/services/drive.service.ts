@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { LoginService } from './login.service';
 import { first } from 'rxjs/operators';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../environments/env';
 import { Observable } from 'rxjs';
+import { rejects } from 'assert';
 
 declare var gapi: any;
 
@@ -21,16 +21,6 @@ export class DriveService {
   createBaseFolder(name?: string): Promise<{ id?: string }> {
     return this.loadGoogleDrive().then(() =>
       this.createFolderInternal({ name })
-    );
-  }
-
-  createFile({
-    withContent = '',
-    folderId = '',
-    name = ''
-  }): Promise<{ id?: string; err?: any }> {
-    return this.loadGoogleDrive().then(() =>
-      this.createFileInternal({ name, folderId, content: withContent })
     );
   }
 
@@ -78,58 +68,82 @@ export class DriveService {
 
   private createFolderInternal({
     name = 'Speecher-Data-Folder',
-  }): Promise<{ id?: string}> {
+  }): Promise<{ id?: string }> {
     const fileMetadata = {
       name,
       mimeType: 'application/vnd.google-apps.folder',
       folderColorRgb: '#007bff',
     };
     console.log('Logged in and trying to create folder in drive.');
-    return this.createFileOrFolder({metadata: fileMetadata});
-  }
-
-  private createFileInternal({
-    name,
-    folderId,
-    content
-  }): Promise<{id?: string }> {
-    const fileMetadata = {
-      name,
-      parent: [folderId],
-    };
-    const media = {
-      mimeType: 'application/json',
-      body: content
-    };
-    console.log('Logged in and trying to create file in drive.');
-    return this.createFileOrFolder({metadata: fileMetadata, media});
-  }
-
-  private createFileOrFolder({ media, metadata }: {media?: any, metadata: any}): Promise<{id?: string}> {
     return new Promise((resolve, reject) => {
-      gapi.client.drive.files
-        .create({
-          resource: metadata,
-          media,
-          fields: 'id',
-        })
-        .then((response) => {
-          switch (response.status) {
-            case 200:
-              const file = response.result;
-              console.log('Created file or folder Id: ', file.id);
-              resolve({ id: file.id });
-              break;
-            default:
-              console.log('Error creating the file or folder, ' + response);
-              reject(response);
-              break;
-          }
-        });
+      const options = {
+        resource: fileMetadata,
+        fields: 'id',
+      };
+      gapi.client.drive.files.create(options).then((response) => {
+        switch (response.status) {
+          case 200:
+            const file = response.result;
+            console.log('Created file or folder Id: ', file.id);
+            resolve({ id: file.id });
+            break;
+          default:
+            console.log('Error creating the file or folder, ' + response);
+            reject(response);
+            break;
+        }
+      });
     });
   }
 
   logout(): Observable<boolean> {
     return this.loginService.logout();
+  }
+
+  createFile({ name, withContent, folderId }: {name: string, withContent: string, folderId: string}): Promise<void> {
+    return this.createFileWithJSONContent({name, data : withContent, folderId});
+  }
+
+  private createFileWithJSONContent({ name, data, folderId }: {name: string, data: any, folderId: string}): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const boundary = '-------speecher-boundary';
+      const delimiter = '\r\n--' + boundary + '\r\n';
+      const closeDelim = '\r\n--' + boundary + '--';
+
+      const contentType = 'application/json';
+
+      const metadata = {
+        name,
+        mimeType: contentType,
+        parents: [folderId]
+      };
+
+      const multipartRequestBody =
+        delimiter +
+        'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: ' +
+        contentType +
+        '\r\n\r\n' +
+        JSON.stringify(data) +
+        closeDelim;
+
+      const request = gapi.client.request({
+        path: '/upload/drive/v3/files',
+        method: 'POST',
+        params: { uploadType: 'multipart' },
+        headers: {
+          'Content-Type': 'multipart/related; boundary="' + boundary + '"',
+        },
+        body: multipartRequestBody,
+      });
+      request.execute((_ , res) => {
+        if (res.status !== 200) {
+          return reject();
+        }
+        resolve();
+      });
+    });
   }
 }
