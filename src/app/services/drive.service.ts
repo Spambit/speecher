@@ -26,12 +26,12 @@ export class DriveService {
 
   findFile({ id }: { id: string }): Promise<boolean> {
     return this.loadGoogleDrive().then(() => {
-      return gapi.client.drive
+      return gapi.client.drive.files
         .list({
           // tslint:disable-next-line: quotemark
-          q: `id=${id}`,
+          q: `'${id}' in parents`,
           fields: 'nextPageToken, files(id, name)',
-          spaces: 'drive',
+          spaces: 'drive'
         })
         .then((res) => (res.status === 200 ? true : false))
         .catch(() => false);
