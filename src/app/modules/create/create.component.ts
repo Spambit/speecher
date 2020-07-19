@@ -9,6 +9,7 @@ import { DriveService } from '@services/drive.service';
 import { ToastService } from '@services/toast.service';
 import { first } from 'rxjs/operators';
 import { createInstanceOfClass } from 'src/app/utils';
+import { NavConfig } from '@components/speecher-nav/speecher-nav.component';
 
 @Component({
   selector: 'speecher-home',
@@ -24,15 +25,22 @@ export class CreateStoryComponent implements OnInit {
     private driveService: DriveService,
     private toastService: ToastService
   ) {}
+  navConfig: NavConfig = {
+    button: {
+      iconColor: this.micColor(),
+      show: true,
+      icon: faMicrophone,
+      click: (e: Event) => this.toggleStart()
+    },
+    header: this.today
+  };
   result = { final: 'Ok this is final result.', intrim: '' };
   started = false;
-  icons = {
-    microfone: faMicrophone,
-  };
   private noteNow?: Note;
   private gdriveParentFolderId = '';
   createWordPanelVisible = false;
-  ngOnInit() {
+  async ngOnInit() {
+    this.noteNow = await this.storeService.todaysNote();
     this.recognizer.events.subscribe(
       ({ result, event, error }) => {
         if (event === SpeechEvents.didStartListening) {

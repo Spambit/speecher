@@ -1,0 +1,13 @@
+@import '../../../../styles.scss';
+.list-group {
+  max-height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border-radius: 0;
+  .list-group-item {
+    border: none;
+    border-bottom: 1px solid pink;
+    border-color: $primary;
+    border-radius: 0;
+  }
+}

@@ -1,3 +1,4 @@
+@import '~typeface-montserrat/index.css';
 /* You can add global styles to this file, and also import other style files */
 $gray-100: #f8f9fa ;
 $gray-200: #d5d9dd ;
@@ -22,7 +23,7 @@ $green:   #28a745 ;
 $teal:    #20c997 ;
 $cyan:    #17a2b8 ;
 
-$primary:       $gray-400 ;
+$primary:       $gray-800 ;
 $secondary:     $gray-500 ;
 $info:          $gray-600 ;
 $success:       $gray-700 ;
@@ -59,6 +60,12 @@ $close-color:                       $gray-300 ;
 
 //textarea
 $textarea-color:                    $gray-300 ;
+
+//font
+$font-family-sans-serif:  Montserrat!default;
+
+//list
+$list-group-bg:                     transparent !default;
 
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';

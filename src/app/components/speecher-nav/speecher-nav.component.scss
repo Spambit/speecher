@@ -1,0 +1,16 @@
+@import '../../../styles.scss';
+.speecher-nav {
+  width: 100%;
+  height: $speecher-nav-bar-height;
+  top: 0;
+  position: fixed;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: $gray-900;
+  > * {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  z-index: 1;
+}

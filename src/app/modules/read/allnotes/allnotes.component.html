@@ -1,0 +1,7 @@
+<speecher-nav [config]="navConfig"></speecher-nav>
+<ul class="list-group">
+  <li class="list-group-item" [ngClass]="{'active': selectedItem == item}" (click)="listClick($event, item)"
+    *ngFor="let item of notes">
+    {{item.name}}
+  </li>
+</ul>
