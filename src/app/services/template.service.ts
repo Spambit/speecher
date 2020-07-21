@@ -5,7 +5,6 @@ import {
   Type,
   TemplateRef,
   ComponentRef,
-  Injector,
   AfterViewInit,
   ViewChild,
   ViewContainerRef,
@@ -17,9 +16,9 @@ export class TemplateService {
   constructor(
     private resolver: ComponentFactoryResolver,
   ) {}
-  public getTemplateContent(
+  public getTemplateContent<T>(
     viewContainer: ViewContainerRef,
-    component: Type<any>
+    component: Type<any>,
   ): Promise<TemplateRef<any>> {
     return new Promise((resolve, reject) => {
       const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(

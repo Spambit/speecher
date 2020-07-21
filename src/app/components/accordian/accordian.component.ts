@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { TemplateWrapperBase } from '@services/template.service';
+import { Word } from '@services/filter.result';
 
 @Component({
     selector: 'speecher-toast-accordian',
@@ -7,4 +8,7 @@ import { TemplateWrapperBase } from '@services/template.service';
     styleUrls: ['accordian.component.scss'],
 })
 export class AccordianComponent extends TemplateWrapperBase {
+  identify(index: number, item: string) {
+    return index;
+  }
 }

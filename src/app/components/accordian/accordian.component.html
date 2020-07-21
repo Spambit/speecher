@@ -1,19 +1,21 @@
-<ng-template>
-  <ngb-accordion activeIds="desc-panel, example-panel">
-    <ngb-panel id='desc-panel'>
-      <ng-template ngbPanelHeader let-opened="opened">
-        <strong class="m-0">Description</strong>
+<ng-template let-word="word">
+  <ngb-accordion activeIds="examples, meaning">
+    <ngb-panel id='meaning'>
+      <ng-template ngbPanelTitle>
+        <strong class="m-0">{{word.name}}</strong>
       </ng-template>
       <ng-template ngbPanelContent>
-        Anim pariatur cliche reprehenderit
+        {{word.meaning}}
       </ng-template>
     </ngb-panel>
-    <ngb-panel id='example-panel'>
-      <ng-template ngbPanelHeader>
+    <ngb-panel id='examples' *ngIf="word.example.length !== 0">
+      <ng-template ngbPanelTitle>
         <strong class="m-0">Example</strong>
       </ng-template>
       <ng-template ngbPanelContent>
-        Aw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
+        <ng-template ngFor let-example [ngForOf]="word.example" let-i="index" [ngForTrackBy]="identify">
+          {{example}}<hr/>
+        </ng-template>
       </ng-template>
     </ngb-panel>
   </ngb-accordion>

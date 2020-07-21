@@ -17,6 +17,7 @@ export class Note {
     destFolderId: string;
   };
   name: string;
+  words: Word[];
 }
 
 export enum Filters {
@@ -26,4 +27,10 @@ export enum Filters {
   dot,
   newpara,
   createword
+}
+
+export interface Word {
+  name: string;
+  meaning: string;
+  example: string[];
 }
