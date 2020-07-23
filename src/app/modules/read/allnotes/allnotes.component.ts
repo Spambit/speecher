@@ -28,16 +28,13 @@ export class AllNotesComponent implements OnInit {
     private templateService: TemplateService,
     private viewRef: ViewContainerRef
   ) {}
-  listClick(event: Event, listItem: HTMLElement) {
-    this.selectedItem = listItem;
-  }
   ngOnInit() {
     this.templateService
       .getTemplateContent(this.viewRef, AccordianComponent)
       .then((ref) => {
         this.contentTemplate = ref;
       });
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       this.notes.push(
         createInstanceOfClass(Note, {
           words: [

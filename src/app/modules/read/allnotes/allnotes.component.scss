@@ -11,9 +11,8 @@ ngb-accordion {
   overflow-y: scroll;
   overflow-x: hidden;
   border-radius: 0;
-  ngb-panel {
-    border: none;
-    border-color: $primary;
-    border-radius: 0;
+  .panel-title {
+    width: 100vw;
+    text-align: left;
   }
 }

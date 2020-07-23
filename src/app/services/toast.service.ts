@@ -4,7 +4,7 @@ import { Injectable, TemplateRef } from '@angular/core';
 export class ToastService {
   toasts: any[] = [];
 
-  show(textOrTpl: string | TemplateRef<any>, options: any = {}) {
+  show(textOrTpl: string | TemplateRef<any>, options: ToastOption  = {}) {
     this.toasts.push({ textOrTpl, ...options });
   }
   showStandard() {
@@ -25,4 +25,11 @@ export class ToastService {
   remove(toast) {
     this.toasts = this.toasts.filter(t => t !== toast);
   }
+}
+
+export interface ToastOption {
+  context?: any;
+  classname?: string;
+  delay?: number;
+  header?: string;
 }

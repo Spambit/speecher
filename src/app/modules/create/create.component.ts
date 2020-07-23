@@ -1,4 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewContainerRef,
+  TemplateRef,
+} from '@angular/core';
 import { SpeecherRecognizer, SpeechEvents } from '@services/speech.service';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import { CommandService } from '@services/command.service';
@@ -10,6 +15,8 @@ import { ToastService } from '@services/toast.service';
 import { first } from 'rxjs/operators';
 import { createInstanceOfClass } from 'src/app/utils';
 import { NavConfig } from '@components/speecher-nav/speecher-nav.component';
+import { TemplateService } from '@services/template.service';
+import { AccordianComponent } from '@components/accordian/accordian.component';
 
 @Component({
   selector: 'speecher-home',
@@ -23,24 +30,41 @@ export class CreateStoryComponent implements OnInit {
     private storeService: LocalStorageService,
     private dateService: DateService,
     private driveService: DriveService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private templateService: TemplateService,
+    private viewRef: ViewContainerRef
   ) {}
+  toastData = {
+    context: {
+      word: {
+        example: ['Ok', 'An example'],
+        name: 'Go',
+        meaning: 'Go or move',
+      },
+    },
+  };
   navConfig: NavConfig = {
     button: {
       iconColor: this.micColor(),
       show: true,
       icon: faMicrophone,
-      click: (e: Event) => this.toggleStart()
+      click: (e: Event) => this.toggleStart(),
     },
-    header: this.today
+    header: this.today,
   };
-  result = { final: 'Ok this is final result.', intrim: '' };
+  toastTemplate: TemplateRef<any>;
+  result = { final: '', intrim: '' };
   started = false;
   private noteNow?: Note;
   private gdriveParentFolderId = '';
   createWordPanelVisible = false;
   async ngOnInit() {
+    this.toastTemplate = await this.templateService.getTemplateContent(
+      this.viewRef,
+      AccordianComponent
+    );
     this.noteNow = await this.storeService.todaysNote();
+    this.result.final = this.noteNow.note;
     this.recognizer.events.subscribe(
       ({ result, event, error }) => {
         if (event === SpeechEvents.didStartListening) {
@@ -87,6 +111,7 @@ export class CreateStoryComponent implements OnInit {
       drive: {
         destFolderId: this.gdriveParentFolderId,
       },
+      words: [],
     });
     this.storeService
       .storeTodaysNote(this.noteNow)
@@ -106,7 +131,10 @@ export class CreateStoryComponent implements OnInit {
 
   private toggleCreateWordPanel() {
     this.createWordPanelVisible = !this.createWordPanelVisible;
-    this.toastService.show('Test');
+    this.toastService.show(this.toastTemplate, this.toastData);
+    setTimeout(() => {
+      this.toastData.context.word.name = 'Another';
+    }, 5000);
   }
 
   private processCommands(
@@ -116,7 +144,7 @@ export class CreateStoryComponent implements OnInit {
     shouldSaveNote: boolean;
     shouldShowCreateWordPanel: boolean;
   } {
-    let result = '';
+    let result = str;
     let shouldSaveNote = false;
     let shouldShowCreateWordPanel = false;
     const filteredResults = this.commandService.filter(str, [
@@ -174,31 +202,9 @@ export class CreateStoryComponent implements OnInit {
 
   toggleStart() {
     if (this.started) {
-      this.driveService
-        .logout()
-        .pipe(first())
-        .subscribe((loggedIn) => {
-          if (!loggedIn) {
-            console.log('logged out');
-          }
-        });
-      this.started = false;
-      return;
-    }
-
-    this.started = true;
-    this.processResult({
-      speech: `Ok that's all. save note`,
-      confidence: 0.09,
-      isFinal: true,
-    });
-    return;
-
-    if (this.started) {
       this.stop();
       return;
     }
-
     this.recognizer.start();
   }
 

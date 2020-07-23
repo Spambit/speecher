@@ -15,7 +15,7 @@ import {ToastService} from '@services/toast.service';
       [header]="toast.header"
     >
       <ng-template [ngIf]="isTemplate(toast)" [ngIfElse]="text">
-        <ng-template [ngTemplateOutlet]="toast.textOrTpl"></ng-template>
+        <ng-template [ngTemplateOutlet]="toast.textOrTpl" [ngTemplateOutletContext]="toast.context"></ng-template>
       </ng-template>
 
       <ng-template #text>{{ toast.textOrTpl }}</ng-template>
@@ -25,7 +25,7 @@ import {ToastService} from '@services/toast.service';
 export class ToastContainerComponent {
   constructor(public toastService: ToastService) {}
   @HostBinding('class.ngb-toasts') applyngbToastClass = true;
-  isTemplate(toast) {
+  isTemplate(toast): boolean {
     return toast.textOrTpl instanceof TemplateRef;
   }
 }

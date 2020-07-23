@@ -9,6 +9,7 @@ export const COMMANDS: ICommand[] = [
       'save note',
       'save this note',
       'create note',
+      'create this note',
       'create a note',
       'create a note of it',
     ],
@@ -21,7 +22,15 @@ export const COMMANDS: ICommand[] = [
   },
   {
     id: Filters.createword,
-    names: ['add the word', 'create word', 'add word'],
-    replaceWith: '\n\n\t\t',
+    names: [
+      'add the word',
+      'create the word',
+      'at the word',
+      'at a word',
+      'create word',
+      'add word',
+      'adwords'
+    ],
+    replaceWith: '',
   },
 ];
