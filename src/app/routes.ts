@@ -1,10 +1,9 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from '@components/home/home.component';
-import { StoryModule } from './story/story.module';
 
 export const names = {
   home: 'home',
-  story: 'story',
+  read: 'read',
+  write: 'write',
 };
 
 export const routes: Routes = [
@@ -20,12 +19,17 @@ export const routes: Routes = [
   },
   {
     path: names.home,
-    component: HomeComponent,
     pathMatch: 'full',
+    loadChildren: () => import('./modules/home/home.module').then(m => m.SpeecherHomeModule),
   },
   {
-    path: names.story,
+    path: names.write,
     pathMatch: 'full',
-    loadChildren: () => import('./story/story.module').then(m => m.StoryModule),
+    loadChildren: () => import('./modules/create/create.module').then(m => m.SpeecherStoryCreationModule),
+  },
+  {
+    path: names.read,
+    pathMatch: 'full',
+    loadChildren: () => import('./modules/read/read.module').then(m => m.SpeecherStoryReadingModule),
   }
 ];

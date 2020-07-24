@@ -1,0 +1,23 @@
+<speecher-nav [config]="navConfig"></speecher-nav>
+<div class="all-notes-container">
+  <ngb-accordion #acc="ngbAccordion">
+    <ng-template ngFor let-item [ngForOf]="notes" let-i="index" [ngForTrackBy]="identify">
+      <ngb-panel [id]="i">
+        <ng-template ngbPanelTitle>
+          <div class="panel-title bg-transparent">
+            <strong class="m-0">{{item.name}}</strong>
+          </div>
+        </ng-template>
+        <ng-template ngbPanelContent>
+          {{item.note}}
+          <hr />
+          <ng-template ngFor let-word [ngForOf]="item.words" let-i="index" [ngForTrackBy]="identify">
+            <ng-template [ngTemplateOutlet]="contentTemplate" [ngTemplateOutletContext]="{word: word}">
+            </ng-template>
+            <br>
+          </ng-template>
+        </ng-template>
+      </ngb-panel>
+    </ng-template>
+  </ngb-accordion>
+</div>

@@ -11,22 +11,17 @@ export const SpeechRecognitionEvent =
 @Injectable({ providedIn: 'root' })
 export class SpeecherRecognizer {
   private recognition: SpeechRecognition;
-  private subject: Subject<SpeechResult>;
-  private sentence: number;
+  private subject: Subject<ISpeechResult>;
   // tslint:disable-next-line: variable-name
   private _started: boolean;
   private set started(val) {
-    if (!val) {
-      this.sentence = 0;
-    }
     this._started = val;
   }
   private get started() {
     return this._started;
   }
   constructor() {
-    this.sentence = 0;
-    this.subject = new Subject<SpeechResult>();
+    this.subject = new Subject<ISpeechResult>();
     this.recognition = new SpeechRecognition();
     this.configureSpeechRecognizer();
   }
@@ -51,6 +46,7 @@ export class SpeecherRecognizer {
 
   private didEndRecognizingSpeech(event) {
     // Fired when the speech this.recognition service has disconnected.
+    this.started = false;
     this.subject.next({
       event: SpeechEvents.didStopListening,
     });
@@ -91,30 +87,17 @@ export class SpeecherRecognizer {
   private didStart(event) {
     // Fired when the speech recognition service has begun listening to
     // incoming audio with intent to recognize grammars associated with the current SpeechRecognition.
+    this.started = true;
     this.subject.next({
       event: SpeechEvents.didStartListening,
     });
   }
 
   private configureSpeechRecognizer() {
-    this.recognition.lang = 'en-US';
-    this.recognition.interimResults = false;
+    this.recognition.lang = 'en-IN';
     this.recognition.maxAlternatives = 1;
-    const punctuations = [
-      {
-        char: ',',
-        sound: 'comma',
-      },
-      {
-        char: '.',
-        sound: 'stop',
-      },
-    ];
-    const colors = ['blue', 'red'];
-    const grammar = '#JSGF V1.0; grammar colors; public <color> = ' + colors.join(' | ') + ' ;';
-    const speechRecognitionList = new SpeechGrammarList();
-    speechRecognitionList.addFromString(grammar, 1);
-    this.recognition.grammars = speechRecognitionList;
+    this.recognition.interimResults = true;
+    this.recognition.continuous = true;
 
     this.recognition.addEventListener('end', e => this.didEndRecognizingSpeech(e));
     this.recognition.addEventListener('start', e => this.didStart(e));
@@ -142,13 +125,13 @@ export class SpeecherRecognizer {
     // These also have getters so they can be accessed like arrays.
     // The second [0] returns the SpeechRecognitionAlternative at position 0.
     // We then return the transcript property of the SpeechRecognitionAlternative object
-    const speech = this.trimAndCapitalizeFirstLetter(event.results[this.sentence][0].transcript + '.');
-    const confidence = event.results[this.sentence][0].confidence;
-    if (this.recognition.continuous) {
-      this.sentence++;
-    }
+    const speechResult = event.results[event.results.length - 1] as SpeechRecognitionResult;
+    const lastRecognisedResult = speechResult[0] as SpeechRecognitionAlternative;
+    const speech = this.trimAndCapitalizeFirstLetter(lastRecognisedResult.transcript);
+    const confidence = lastRecognisedResult.confidence;
+    const isFinal = speechResult.isFinal;
     this.subject.next({
-      result: { speech, confidence },
+      result: { speech, confidence, isFinal },
       event: SpeechEvents.didReceiveResult,
     });
   }
@@ -157,9 +140,7 @@ export class SpeecherRecognizer {
     return this.subject;
   }
 
-  start(continuous = false) {
-    this.recognition.continuous = continuous;
-    this.started = true;
+  start() {
     this.recognition.start();
   }
 
@@ -173,8 +154,8 @@ export class SpeecherRecognizer {
   }
 }
 
-export interface SpeechResult {
-  result?: { speech: string; confidence: any };
+export interface ISpeechResult {
+  result?: { speech: string; confidence: any, isFinal: boolean };
   error?: { reason: string; original: any };
   event: SpeechEvents;
 }

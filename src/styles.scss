@@ -1,1 +1,102 @@
+@import '~typeface-montserrat/index.css';
 /* You can add global styles to this file, and also import other style files */
+$gray-100: #f8f9fa ;
+$gray-200: #d5d9dd ;
+$gray-300: #c5c8cc ;
+$gray-400: rgb(199, 205, 211) ;
+$gray-500: #7c8083 ;
+$gray-600: #535557 ;
+$gray-700: #3a3b3d ;
+$gray-800: #343638 ;
+$gray-900: #121213 ;
+
+$black:    #000 ;
+$white:    #FFF;
+$blue:    #007bff ;
+$indigo:  #6610f2 ;
+$purple:  #6f42c1 ;
+$pink:    #e83e8c ;
+$red:     #dc3545 ;
+$orange:  #fd7e14 ;
+$yellow:  #ffc107 ;
+$green:   #28a745 ;
+$teal:    #20c997 ;
+$cyan:    #17a2b8 ;
+
+$primary:       $gray-400 ;
+$secondary:     $gray-500 ;
+$info:          $gray-600 ;
+$success:       $gray-700 ;
+$warning:       $yellow ;
+$danger:        $red ;
+$light:         $gray-100 ;
+$dark:          $gray-900 ;
+
+// body
+$body-bg: $gray-900;
+$body-color: $gray-200;
+
+// jumbotron
+$jumbotron-color: $gray-300;
+$jumbotron-bg: $gray-900;
+
+//toast
+$toast-header-color:                $gray-100;
+$toast-header-background-color:     rgba($black, .55);
+$toast-header-border-color:         rgba(0, 0, 0, .05) ;
+$toast-border-color:                rgba(0, 0, 0, .3) ;
+$toast-color:                       $gray-100;
+$toast-background-color:            rgba($black, .55) ;
+
+//card
+$card-color:                        $gray-400;
+$card-bg:                           $gray-900;
+$card-cap-bg:                       $gray-900;
+$card-cap-color:                    $gray-200;
+$card-border-color:                 $black;
+
+//close
+$close-color:                       $gray-300 ;
+
+//textarea
+$textarea-color:                    $gray-300 ;
+
+//font
+$font-family-sans-serif:  Montserrat!default;
+
+//list
+$list-group-bg:                     transparent !default;
+
+/* Importing Bootstrap SCSS file. */
+@import '~bootstrap/scss/bootstrap';
+
+body {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+textarea:hover,
+input:hover,
+textarea:active,
+input:active,
+textarea:focus,
+input:focus,
+button:focus,
+button:active,
+button:hover,
+label:focus,
+.btn:active,
+.btn.active
+{
+    outline:0px !important;
+    -webkit-appearance:none;
+    box-shadow: none !important;
+}
+
+$speecher-nav-bar-height: 44px;

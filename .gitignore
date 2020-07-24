@@ -44,3 +44,7 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+
+//drive keys
+/src/app/conf/conf.drive.keys.ts

@@ -1,0 +1,6 @@
+<div class='speecher-nav'>
+  <small>{{config.header}}</small>
+  <button *ngIf='config.button.show' type="button" class="btn bg-transparent" (click)='config.button.click($event)'>
+    <fa-icon [style.color]="config.button.iconColor" [icon]="config.button.icon"></fa-icon>
+  </button>
+</div>
