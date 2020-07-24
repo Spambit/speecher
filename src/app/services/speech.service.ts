@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { ISpeechError, SpeechEvent } from './filter.result';
 
 export const SpeechRecognition =
 (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -9,7 +10,7 @@ export const SpeechRecognitionEvent =
 (window as any).SpeechRecognitionEvent || (window as any).webkitSpeechRecognitionEvent;
 
 @Injectable({ providedIn: 'root' })
-export class SpeecherRecognizer {
+export class SpeecherRecognizerService {
   private recognition: SpeechRecognition;
   private subject: Subject<ISpeechResult>;
   // tslint:disable-next-line: variable-name
@@ -33,14 +34,14 @@ export class SpeecherRecognizer {
   private didStartAudio(event) {
     // Fired when the user agent has started to capture audio.
     this.subject.next({
-      event: SpeechEvents.didStartCaptureAudio,
+      event: SpeechEvent.didStartCaptureAudio,
     });
   }
 
   private didEndAudio(event) {
     // Fired when the user agent has finished capturing audio.
     this.subject.next({
-      event: SpeechEvents.didEndCaptureAudio,
+      event: SpeechEvent.didEndCaptureAudio,
     });
   }
 
@@ -48,7 +49,7 @@ export class SpeecherRecognizer {
     // Fired when the speech this.recognition service has disconnected.
     this.started = false;
     this.subject.next({
-      event: SpeechEvents.didStopListening,
+      event: SpeechEvent.didStopListening,
     });
   }
 
@@ -58,21 +59,21 @@ export class SpeecherRecognizer {
     // This may involve some degree of recognition,
     // which doesn't meet or exceed the confidence threshold.
     this.subject.next({
-      event: SpeechEvents.noMatchAnyGrammer,
+      event: SpeechEvent.noMatchAnyGrammer,
     });
   }
 
   private didStartSound(event) {
     // Fired when any sound — recognisable speech or not — has been detected.
     this.subject.next({
-      event: SpeechEvents.didDetectSound,
+      event: SpeechEvent.didDetectSound,
     });
   }
 
   private didEndSound(event) {
     // Fired when any sound — recognisable speech or not — has stopped being detected.
     this.subject.next({
-      event: SpeechEvents.didStopDetectingSound,
+      event: SpeechEvent.didStopDetectingSound,
     });
   }
 
@@ -80,7 +81,7 @@ export class SpeecherRecognizer {
     // Fired when sound that is recognised by the speech recognition
     // service as speech has been detected.
     this.subject.next({
-      event: SpeechEvents.didDetectRecognizableSound,
+      event: SpeechEvent.didDetectRecognizableSound,
     });
   }
 
@@ -89,7 +90,7 @@ export class SpeecherRecognizer {
     // incoming audio with intent to recognize grammars associated with the current SpeechRecognition.
     this.started = true;
     this.subject.next({
-      event: SpeechEvents.didStartListening,
+      event: SpeechEvent.didStartListening,
     });
   }
 
@@ -132,7 +133,7 @@ export class SpeecherRecognizer {
     const isFinal = speechResult.isFinal;
     this.subject.next({
       result: { speech, confidence, isFinal },
-      event: SpeechEvents.didReceiveResult,
+      event: SpeechEvent.didReceiveResult,
     });
   }
 
@@ -148,7 +149,7 @@ export class SpeecherRecognizer {
     if (!this.started) {
       return;
     }
-    this.subject.next({ event: SpeechEvents.didRequestStop });
+    this.subject.next({ event: SpeechEvent.didRequestStop });
     this.recognition.stop();
     this.started = false;
   }
@@ -156,19 +157,6 @@ export class SpeecherRecognizer {
 
 export interface ISpeechResult {
   result?: { speech: string; confidence: any, isFinal: boolean };
-  error?: { reason: string; original: any };
-  event: SpeechEvents;
-}
-
-export enum SpeechEvents {
-  didStartCaptureAudio,
-  didEndCaptureAudio,
-  didStopListening,
-  noMatchAnyGrammer,
-  didDetectSound,
-  didStopDetectingSound,
-  didDetectRecognizableSound,
-  didStartListening,
-  didReceiveResult,
-  didRequestStop,
+  error?: ISpeechError;
+  event: SpeechEvent;
 }

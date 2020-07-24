@@ -17,20 +17,44 @@ export class Note {
     destFolderId: string;
   };
   name: string;
-  words: Word[];
+  words: IWord[];
 }
 
-export enum Filters {
+export enum Filter {
   comma,
   savenote,
   start,
   dot,
   newpara,
-  createword
+  createword,
+  wordname,
+  wordmeaning,
+  wordexample,
+  wordclose,
 }
 
-export interface Word {
+export interface IWord {
   name: string;
   meaning: string;
   example: string[];
+}
+
+export enum SpeechEvent {
+  didStartCaptureAudio,
+  didEndCaptureAudio,
+  didStopListening,
+  noMatchAnyGrammer,
+  didDetectSound,
+  didStopDetectingSound,
+  didDetectRecognizableSound,
+  didStartListening,
+  didReceiveResult,
+  didRequestStop,
+  didStartSpeaking,
+  didStopSpeaking,
+}
+
+export interface ISpeechError {
+  reason: string;
+  original: any;
 }

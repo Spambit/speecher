@@ -4,19 +4,25 @@ import {
   ViewContainerRef,
   TemplateRef,
 } from '@angular/core';
-import { SpeecherRecognizer, SpeechEvents } from '@services/speech.service';
+import { SpeecherRecognizerService } from '@services/speech.service';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import { CommandService } from '@services/command.service';
-import { Filters, Note } from '@services/filter.result';
+import {
+  Filter,
+  Note,
+  SpeechEvent,
+  IFilterResult,
+} from '@services/filter.result';
 import { LocalStorageService } from '@services/store.service';
 import { DateService } from '@services/date.service';
 import { DriveService } from '@services/drive.service';
 import { ToastService } from '@services/toast.service';
-import { first } from 'rxjs/operators';
+import { SpeakService } from '@services/speak.service';
 import { createInstanceOfClass } from 'src/app/utils';
 import { NavConfig } from '@components/speecher-nav/speecher-nav.component';
 import { TemplateService } from '@services/template.service';
 import { AccordianComponent } from '@components/accordian/accordian.component';
+import { first, take } from 'rxjs/operators';
 
 @Component({
   selector: 'speecher-home',
@@ -25,24 +31,17 @@ import { AccordianComponent } from '@components/accordian/accordian.component';
 })
 export class CreateStoryComponent implements OnInit {
   constructor(
-    private recognizer: SpeecherRecognizer,
+    private recognizerService: SpeecherRecognizerService,
     private commandService: CommandService,
     private storeService: LocalStorageService,
     private dateService: DateService,
     private driveService: DriveService,
     private toastService: ToastService,
     private templateService: TemplateService,
-    private viewRef: ViewContainerRef
+    private viewRef: ViewContainerRef,
+    private speakService: SpeakService
   ) {}
-  toastData = {
-    context: {
-      word: {
-        example: ['Ok', 'An example'],
-        name: 'Go',
-        meaning: 'Go or move',
-      },
-    },
-  };
+  private mutableWordPanelData = this.immutableWordPanelData;
   navConfig: NavConfig = {
     button: {
       iconColor: this.micColor(),
@@ -53,28 +52,41 @@ export class CreateStoryComponent implements OnInit {
     header: this.today,
   };
   toastTemplate: TemplateRef<any>;
-  result = { final: '', intrim: '' };
+  result: IResult = { final: '', intrim: '' };
+  wordResult: IResult = { final: '', intrim: '' };
+  pause = false;
   started = false;
   private noteNow?: Note;
   private gdriveParentFolderId = '';
-  createWordPanelVisible = false;
+  private wordPanelVisibleInternal = false;
+  set wordPanelVisible(val: boolean) {
+    if (!val) {
+      this.clearWordPanelData();
+    }
+    this.wordPanelVisibleInternal = val;
+  }
+  get wordPanelVisible() {
+    return this.wordPanelVisibleInternal;
+  }
   async ngOnInit() {
     this.toastTemplate = await this.templateService.getTemplateContent(
       this.viewRef,
       AccordianComponent
     );
     this.noteNow = await this.storeService.todaysNote();
-    this.result.final = this.noteNow.note;
-    this.recognizer.events.subscribe(
+    this.result.final = (this.noteNow && this.noteNow.note) || '';
+    this.recognizerService.events.subscribe(
       ({ result, event, error }) => {
-        if (event === SpeechEvents.didStartListening) {
+        if (event === SpeechEvent.didStartListening) {
           this.started = true;
         }
-        if (event === SpeechEvents.didStopListening) {
+        if (event === SpeechEvent.didStopListening) {
           this.started = false;
         }
-        if (event === SpeechEvents.didReceiveResult) {
-          this.processResult(result);
+        if (event === SpeechEvent.didReceiveResult) {
+          if (!this.pause) {
+            this.processResult(result);
+          }
         }
       },
       (err) => {
@@ -85,11 +97,102 @@ export class CreateStoryComponent implements OnInit {
     );
   }
 
+  private clearWordPanelData() {
+    this.wordResult.final = '';
+    this.wordResult.intrim = '';
+    this.mutableWordPanelData = this.immutableWordPanelData;
+  }
+
+  private get immutableWordPanelData() {
+    return {
+      context: {
+        word: {
+          example: [],
+          name: '',
+          meaning: '',
+          dirtySection: WordSection.name,
+        },
+      },
+    };
+  }
+
   private findFolder({ id = '' }): Promise<boolean> {
     return this.driveService.findFile({ id });
   }
 
   private processResult(result: {
+    speech: string;
+    confidence: any;
+    isFinal: boolean;
+  }) {
+    if (this.wordPanelVisible) {
+      return this.processWordResult(result);
+    }
+    return this.processNoteResult(result);
+  }
+
+  private processWordResult(result: {
+    speech: string;
+    confidence: any;
+    isFinal: boolean;
+  }) {
+    if (result.isFinal) {
+      let utter = '';
+      const commands = this.processWordCommands(result.speech);
+      if (commands.shouldSelectExampleWordSection) {
+        this.mutableWordPanelData.context.word.dirtySection =
+          WordSection.examples;
+        utter = 'Say an example';
+      } else if (commands.shouldSelectMeaningWordSection) {
+        this.mutableWordPanelData.context.word.dirtySection =
+          WordSection.meaning;
+        utter = 'Say the meaning';
+      } else if (commands.shouldSelectNameWordSection) {
+        this.mutableWordPanelData.context.word.dirtySection = WordSection.name;
+        utter = 'Say the word';
+      }
+      this.pause = true;
+      this.speakService
+        .speak(utter)
+        .pipe(take(2))
+        .subscribe(
+          (e) => {
+            if (e === SpeechEvent.didStopSpeaking) {
+              this.pause = false;
+              this.setResultInCurrentActiveWordSection(commands.result);
+            }
+          },
+          (err) => (this.pause = false)
+        );
+
+      if (commands.close) {
+        this.toastService.removeLast();
+        this.wordPanelVisible = false;
+      }
+    }
+  }
+
+  private setResultInCurrentActiveWordSection(str: string) {
+    switch (this.mutableWordPanelData.context.word.dirtySection) {
+      case WordSection.name:
+        if (str.length !== 0) {
+          this.mutableWordPanelData.context.word.name = str;
+        }
+        break;
+      case WordSection.meaning:
+        if (str.length !== 0) {
+          this.mutableWordPanelData.context.word.meaning = str;
+        }
+        break;
+      case WordSection.examples:
+        if (str.length !== 0) {
+          this.mutableWordPanelData.context.word.example.push(str);
+        }
+        break;
+    }
+  }
+
+  private processNoteResult(result: {
     speech: string;
     confidence: any;
     isFinal: boolean;
@@ -102,7 +205,7 @@ export class CreateStoryComponent implements OnInit {
       return;
     }
     this.result.intrim = '';
-    const processedResult = this.processCommands(result.speech);
+    const processedResult = this.processNoteCommands(result.speech);
     this.result.final += ' ' + processedResult.result;
     this.noteNow = createInstanceOfClass(Note, {
       name: this.today,
@@ -130,14 +233,70 @@ export class CreateStoryComponent implements OnInit {
   }
 
   private toggleCreateWordPanel() {
-    this.createWordPanelVisible = !this.createWordPanelVisible;
-    this.toastService.show(this.toastTemplate, this.toastData);
-    setTimeout(() => {
-      this.toastData.context.word.name = 'Another';
-    }, 5000);
+    this.wordPanelVisible = !this.wordPanelVisible;
+    if (!this.wordPanelVisible) {
+      return;
+    }
+
+    this.toastService.show(this.toastTemplate, this.mutableWordPanelData);
+    this.pause = true;
+    this.speakService
+      .speak('Say the word')
+      .pipe(take(2))
+      .subscribe(
+        (e) => {
+          if (e === SpeechEvent.didStopSpeaking) {
+            this.pause = false;
+          }
+        },
+        () => (this.pause = false)
+      );
   }
 
-  private processCommands(
+  private processWordCommands(
+    str: string
+  ): {
+    result: string;
+    shouldSelectMeaningWordSection: boolean;
+    shouldSelectNameWordSection: boolean;
+    shouldSelectExampleWordSection: boolean;
+    close: boolean;
+  } {
+    let result = str;
+    let shouldSelectNameWordSection = false;
+    let shouldSelectExampleWordSection = false;
+    let shouldSelectMeaningWordSection = false;
+    let close = false;
+    const filteredResults = this.commandService.filter(str, [
+      Filter.wordname,
+      Filter.wordmeaning,
+      Filter.wordexample,
+    ]);
+    if (filteredResults.length !== 0) {
+      result = this.commandService.process(filteredResults, str);
+      shouldSelectNameWordSection = filteredResults.some(
+        (filterResult) => filterResult.command.id === Filter.wordname
+      );
+      shouldSelectMeaningWordSection = filteredResults.some(
+        (filterResult) => filterResult.command.id === Filter.wordmeaning
+      );
+      shouldSelectExampleWordSection = filteredResults.some(
+        (filterResult) => filterResult.command.id === Filter.wordexample
+      );
+      close = filteredResults.some(
+        (filterResult) => filterResult.command.id === Filter.wordclose
+      );
+    }
+    return {
+      result,
+      shouldSelectNameWordSection,
+      shouldSelectMeaningWordSection,
+      shouldSelectExampleWordSection,
+      close,
+    };
+  }
+
+  private processNoteCommands(
     str: string
   ): {
     result: string;
@@ -148,22 +307,26 @@ export class CreateStoryComponent implements OnInit {
     let shouldSaveNote = false;
     let shouldShowCreateWordPanel = false;
     const filteredResults = this.commandService.filter(str, [
-      Filters.comma,
-      Filters.dot,
-      Filters.newpara,
-      Filters.savenote,
-      Filters.createword,
+      Filter.comma,
+      Filter.dot,
+      Filter.newpara,
+      Filter.savenote,
+      Filter.createword,
     ]);
     if (filteredResults.length !== 0) {
       result = this.commandService.process(filteredResults, str);
       shouldSaveNote = filteredResults.some(
-        (filterResult) => filterResult.command.id === Filters.savenote
+        (filterResult) => filterResult.command.id === Filter.savenote
       );
       shouldShowCreateWordPanel = filteredResults.some(
-        (filterResult) => filterResult.command.id === Filters.createword
+        (filterResult) => filterResult.command.id === Filter.createword
       );
     }
-    return { result, shouldSaveNote, shouldShowCreateWordPanel };
+    return {
+      result,
+      shouldSaveNote,
+      shouldShowCreateWordPanel,
+    };
   }
 
   private saveNoteInGoogleDrive(): Promise<void> {
@@ -205,7 +368,7 @@ export class CreateStoryComponent implements OnInit {
       this.stop();
       return;
     }
-    this.recognizer.start();
+    this.recognizerService.start();
   }
 
   micColor() {
@@ -219,10 +382,21 @@ export class CreateStoryComponent implements OnInit {
   }
 
   private stop() {
-    this.recognizer.stop();
+    this.recognizerService.stop();
   }
 
   get today() {
     return this.dateService.today;
   }
+}
+
+interface IResult {
+  final: string;
+  intrim: string;
+}
+
+enum WordSection {
+  name,
+  meaning,
+  examples,
 }

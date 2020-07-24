@@ -25,6 +25,9 @@ export class ToastService {
   remove(toast) {
     this.toasts = this.toasts.filter(t => t !== toast);
   }
+  removeLast(){
+    this.toasts.pop();
+  }
 }
 
 export interface ToastOption {
