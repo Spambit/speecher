@@ -32,8 +32,8 @@ export class SpeakService {
   }
 
   speak(str: string): Observable<SpeechEvent> {
-    if (this.computer.speaking || str === '') {
-      this.event$.error({err: 'Computer speaking already or some other error occured'});
+    if (this.computer.speaking) {
+      this.event$.error({err: 'Computer is speaking already.'});
     }
 
     if (str !== '') {

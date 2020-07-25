@@ -1,6 +1,6 @@
 <speecher-nav [config]='navConfig'></speecher-nav>
 <section class='home-speech'>
-  <textarea spellcheck='false' class="form-control bg-transparent">
+  <textarea (change)="saveNote($event)" spellcheck='false' class="speecher-font-big form-control bg-transparent">
     {{result.intrim !== ''? result.intrim : result.final}}
   </textarea>
 </section>

@@ -37,7 +37,8 @@ export const COMMANDS: ICommand[] = [
     id: Filter.wordname,
     names: [
       'add name',
-      'adname',
+      'at name',
+      'ad name',
     ],
     replaceWith: '',
   },
@@ -45,14 +46,24 @@ export const COMMANDS: ICommand[] = [
     id: Filter.wordexample,
     names: [
       'add example',
+      'at example',
+      'ad example',
     ],
     replaceWith: '',
   },
   {
     id: Filter.wordmeaning,
     names: [
+      'at meaning',
       'ad meaning',
       'add meaning',
+    ],
+    replaceWith: '',
+  },
+  {
+    id: Filter.wordclose,
+    names: [
+      'close now',
     ],
     replaceWith: '',
   },

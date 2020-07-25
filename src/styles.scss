@@ -67,6 +67,8 @@ $font-family-sans-serif:  Montserrat!default;
 //list
 $list-group-bg:                     transparent !default;
 
+$enable-responsive-font-sizes : true;
+
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
 
@@ -75,6 +77,12 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+}
+
+.speecher-font-big {
+  font-size: 1.2em; // TODO : same style in story and this. Separate this.
+  line-height: 1.7em;
+  word-spacing: 0.04em;
 }
 
 ::-webkit-scrollbar {

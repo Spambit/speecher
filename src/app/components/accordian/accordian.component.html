@@ -1,11 +1,16 @@
 <ng-template let-word="word">
   <ngb-accordion activeIds="examples, meaning">
     <ngb-panel id='meaning'>
-      <ng-template ngbPanelTitle>
-        <strong class="m-0">{{word.name}}</strong>
+      <ng-template ngbPanelHeader>
+        <div class="d-flex justify-content-between">
+          <textarea (change)="word.onChange('name', $event)" spellcheck='false' class="border-0 form-control bg-dark" rows="1">{{word.name}}</textarea>
+          <button *ngIf ="word.onClose" type="button" (click)="word.onClose()" class="ml-2 close" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
       </ng-template>
       <ng-template ngbPanelContent>
-        {{word.meaning}}
+        <textarea (change)="word.onChange('meaning', $event)" rows="1" spellcheck='false' class="border-0 form-control bg-dark">{{word.meaning}}</textarea>
       </ng-template>
     </ngb-panel>
     <ngb-panel id='examples' *ngIf="word.example.length !== 0">
@@ -14,7 +19,7 @@
       </ng-template>
       <ng-template ngbPanelContent>
         <ng-template ngFor let-example [ngForOf]="word.example" let-i="index" [ngForTrackBy]="identify">
-          {{example}}<hr/>
+          <textarea (change)="word.onChange('example', $event, i)" rows="1" spellcheck='false' class="border-0 form-control bg-dark">{{example}}</textarea><hr/>
         </ng-template>
       </ng-template>
     </ngb-panel>

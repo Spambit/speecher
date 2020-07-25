@@ -5,6 +5,7 @@
   height: 100%;
   padding-top: $speecher-nav-bar-height;
 }
+@import "../../../../styles.scss";
 ngb-accordion {
   height: 100%;
   display: block;
@@ -12,7 +13,8 @@ ngb-accordion {
   overflow-x: hidden;
   border-radius: 0;
   .panel-title {
-    width: 100vw;
+    width: 80vw;
     text-align: left;
   }
+  @extend .speecher-font-big;
 }

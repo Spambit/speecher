@@ -51,8 +51,18 @@ export class LocalStorageService {
   }
 
 
-  todaysNote(): Promise<any> {
+  todaysNote<T>(): Promise<T> {
     return this.storeOf(StoreType.note).getItem(this.dateService.today);
+  }
+
+  async allNotes<T>(): Promise<T[]> {
+    const table = this.storeOf(StoreType.note);
+    const keys = await table.keys();
+    const notes: T[] = [];
+    for (const key of keys) {
+      notes.push(await table.getItem(key));
+    }
+    return notes;
   }
 }
 

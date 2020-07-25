@@ -54,7 +54,7 @@ export class CreateStoryComponent implements OnInit {
   toastTemplate: TemplateRef<any>;
   result: IResult = { final: '', intrim: '' };
   wordResult: IResult = { final: '', intrim: '' };
-  pause = false;
+  private pauseListening = false;
   started = false;
   private noteNow?: Note;
   private gdriveParentFolderId = '';
@@ -69,11 +69,33 @@ export class CreateStoryComponent implements OnInit {
     return this.wordPanelVisibleInternal;
   }
   async ngOnInit() {
+    this.speakService.event$.subscribe(
+      (event) => {
+        if (event === SpeechEvent.didStopSpeaking) {
+          this.resumeListeningDelayed();
+        }
+        if (event === SpeechEvent.didStartSpeaking) {
+          console.log('Paused listening');
+          this.pauseListening = true;
+        }
+      },
+      (e) => {
+        this.resumeListeningDelayed();
+      }
+    );
     this.toastTemplate = await this.templateService.getTemplateContent(
       this.viewRef,
       AccordianComponent
     );
-    this.noteNow = await this.storeService.todaysNote();
+    this.noteNow = await this.storeService.todaysNote() || createInstanceOfClass(Note, {
+      name: this.today,
+      note: this.result.final,
+      when: this.dateService.now,
+      drive: {
+        destFolderId: this.gdriveParentFolderId,
+      },
+      words: [],
+    });
     this.result.final = (this.noteNow && this.noteNow.note) || '';
     this.recognizerService.events.subscribe(
       ({ result, event, error }) => {
@@ -84,7 +106,7 @@ export class CreateStoryComponent implements OnInit {
           this.started = false;
         }
         if (event === SpeechEvent.didReceiveResult) {
-          if (!this.pause) {
+          if (!this.pauseListening) {
             this.processResult(result);
           }
         }
@@ -95,6 +117,13 @@ export class CreateStoryComponent implements OnInit {
         this.stop();
       }
     );
+  }
+
+  private resumeListeningDelayed() {
+    window.setTimeout(() => {
+      this.pauseListening = false;
+      console.log('Resumed listening.');
+    }, 2000);
   }
 
   private clearWordPanelData() {
@@ -111,9 +140,17 @@ export class CreateStoryComponent implements OnInit {
           name: '',
           meaning: '',
           dirtySection: WordSection.name,
+          onClose: () => this.onCloseWordPanel(),
+          onChange: (panel: string, event: Event, index: number) =>
+            this.onTextChangeInWordPanel(panel, event, index),
         },
       },
     };
+  }
+
+  private onCloseWordPanel() {
+    this.toastService.removeLast();
+    this.wordPanelVisible = false;
   }
 
   private findFolder({ id = '' }): Promise<boolean> {
@@ -142,28 +179,19 @@ export class CreateStoryComponent implements OnInit {
       if (commands.shouldSelectExampleWordSection) {
         this.mutableWordPanelData.context.word.dirtySection =
           WordSection.examples;
-        utter = 'Say an example';
       } else if (commands.shouldSelectMeaningWordSection) {
         this.mutableWordPanelData.context.word.dirtySection =
           WordSection.meaning;
-        utter = 'Say the meaning';
+        utter = 'ok';
       } else if (commands.shouldSelectNameWordSection) {
         this.mutableWordPanelData.context.word.dirtySection = WordSection.name;
-        utter = 'Say the word';
+        utter = 'ok';
+      } else if (commands.close) {
+        this.mutableWordPanelData.context.word.dirtySection = WordSection.name;
+        utter = 'ok';
       }
-      this.pause = true;
-      this.speakService
-        .speak(utter)
-        .pipe(take(2))
-        .subscribe(
-          (e) => {
-            if (e === SpeechEvent.didStopSpeaking) {
-              this.pause = false;
-              this.setResultInCurrentActiveWordSection(commands.result);
-            }
-          },
-          (err) => (this.pause = false)
-        );
+      this.speakService.speak(utter);
+      this.setResultInCurrentActiveWordSection(commands.result);
 
       if (commands.close) {
         this.toastService.removeLast();
@@ -192,11 +220,43 @@ export class CreateStoryComponent implements OnInit {
     }
   }
 
+  private saveNewlyCreatedWordInLocalStorage(){
+    const {example, meaning, name} = this.mutableWordPanelData.context.word;
+    const found = this.noteNow.words.find((word) => word.name === name);
+    if (!found){
+      this.noteNow.words.push({example: [...example], meaning, name});
+    }else {
+      const index = this.noteNow.words.indexOf(found);
+      this.noteNow.words[index] = {example: [...example], meaning, name};
+    }
+    this.storeService
+      .storeTodaysNote(this.noteNow)
+      .catch(console.error)
+      .then((data) => {
+        console.log('Data stored.');
+      });
+  }
+
+  saveNote(event: Event){
+    const textarea = event.target as HTMLTextAreaElement;
+    this.noteNow.note = textarea.value;
+    this.storeService
+      .storeTodaysNote(this.noteNow)
+      .catch(console.error)
+      .then((data) => {
+        console.log('Data stored.');
+      });
+  }
+
   private processNoteResult(result: {
     speech: string;
     confidence: any;
     isFinal: boolean;
   }) {
+    if (result.speech === '') {
+      return;
+    }
+
     const intrimResult = this.result.final + ' ' + result.speech;
     if (!result.isFinal) {
       if (intrimResult.length > this.result.intrim.length) {
@@ -207,15 +267,7 @@ export class CreateStoryComponent implements OnInit {
     this.result.intrim = '';
     const processedResult = this.processNoteCommands(result.speech);
     this.result.final += ' ' + processedResult.result;
-    this.noteNow = createInstanceOfClass(Note, {
-      name: this.today,
-      note: this.result.final,
-      when: this.dateService.now,
-      drive: {
-        destFolderId: this.gdriveParentFolderId,
-      },
-      words: [],
-    });
+    this.noteNow.note = this.result.final;
     this.storeService
       .storeTodaysNote(this.noteNow)
       .catch(console.error)
@@ -239,18 +291,8 @@ export class CreateStoryComponent implements OnInit {
     }
 
     this.toastService.show(this.toastTemplate, this.mutableWordPanelData);
-    this.pause = true;
-    this.speakService
-      .speak('Say the word')
-      .pipe(take(2))
-      .subscribe(
-        (e) => {
-          if (e === SpeechEvent.didStopSpeaking) {
-            this.pause = false;
-          }
-        },
-        () => (this.pause = false)
-      );
+    this.pauseListening = true;
+    this.speakService.speak('Say the word');
   }
 
   private processWordCommands(
@@ -271,6 +313,7 @@ export class CreateStoryComponent implements OnInit {
       Filter.wordname,
       Filter.wordmeaning,
       Filter.wordexample,
+      Filter.wordclose,
     ]);
     if (filteredResults.length !== 0) {
       result = this.commandService.process(filteredResults, str);
@@ -361,6 +404,16 @@ export class CreateStoryComponent implements OnInit {
       })
       .then((res) => Promise.resolve())
       .catch(Promise.reject);
+  }
+
+  private onTextChangeInWordPanel(panel: string, event: Event, index: number) {
+    const textarea = event.target as HTMLTextAreaElement;
+    if (panel === 'example'){
+      this.mutableWordPanelData.context.word.example[index] = textarea.value;
+    }else {
+      this.mutableWordPanelData.context.word[panel] = textarea.value;
+    }
+    this.saveNewlyCreatedWordInLocalStorage();
   }
 
   toggleStart() {
