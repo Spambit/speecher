@@ -58,3 +58,21 @@ export interface ISpeechError {
   reason: string;
   original: any;
 }
+
+export enum WordSection {
+  name,
+  meaning,
+  examples,
+}
+
+export interface IAccordianContext {
+  word: {
+    example: string[],
+    name: string,
+    meaning: string,
+    dirtySection: WordSection,
+    onClose: () => void,
+    onChange: (event: Event) => void,
+  };
+}
+

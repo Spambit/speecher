@@ -7,12 +7,7 @@ import {
 import { SpeecherRecognizerService } from '@services/speech.service';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import { CommandService } from '@services/command.service';
-import {
-  Filter,
-  Note,
-  SpeechEvent,
-  IFilterResult,
-} from '@services/filter.result';
+import { Filter, Note, SpeechEvent, IAccordianContext, WordSection } from '@services/filter.result';
 import { LocalStorageService } from '@services/store.service';
 import { DateService } from '@services/date.service';
 import { DriveService } from '@services/drive.service';
@@ -22,7 +17,8 @@ import { createInstanceOfClass } from 'src/app/utils';
 import { NavConfig } from '@components/speecher-nav/speecher-nav.component';
 import { TemplateService } from '@services/template.service';
 import { AccordianComponent } from '@components/accordian/accordian.component';
-import { first, take } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'speecher-home',
@@ -42,6 +38,7 @@ export class CreateStoryComponent implements OnInit {
     private speakService: SpeakService
   ) {}
   private mutableWordPanelData = this.immutableWordPanelData;
+  private intrimPrefix = 'intrim::';
   navConfig: NavConfig = {
     button: {
       iconColor: this.micColor(),
@@ -52,9 +49,26 @@ export class CreateStoryComponent implements OnInit {
     header: this.today,
   };
   toastTemplate: TemplateRef<any>;
-  result: IResult = { final: '', intrim: '' };
-  wordResult: IResult = { final: '', intrim: '' };
+  result = new SpeechResult();
+  wordResult = new SpeechResult();
   private pauseListening = false;
+  noteChange$ = new Subject<string>();
+  set textAreaValue(v) {
+    /**
+     * intrim:: prefix won't come from ngModel of textArea.
+     * Hence, it will always set to final result.
+     * This will happen after user edits manually.
+     */
+    if (v.startsWith(this.intrimPrefix)) {
+      // intrim:: has 8 characters
+      this.result.intrim = v.slice(8);
+      return;
+    }
+    this.result.final = v;
+  }
+  get textAreaValue() {
+    return this.result.final === '' ? this.result.intrim : this.result.final;
+  }
   started = false;
   private noteNow?: Note;
   private gdriveParentFolderId = '';
@@ -69,6 +83,12 @@ export class CreateStoryComponent implements OnInit {
     return this.wordPanelVisibleInternal;
   }
   async ngOnInit() {
+    this.noteChange$
+      .pipe(
+        debounceTime(2000))
+      .subscribe((val) => {
+        this.saveNote(val);
+      });
     this.speakService.event$.subscribe(
       (event) => {
         if (event === SpeechEvent.didStopSpeaking) {
@@ -87,15 +107,17 @@ export class CreateStoryComponent implements OnInit {
       this.viewRef,
       AccordianComponent
     );
-    this.noteNow = await this.storeService.todaysNote() || createInstanceOfClass(Note, {
-      name: this.today,
-      note: this.result.final,
-      when: this.dateService.now,
-      drive: {
-        destFolderId: this.gdriveParentFolderId,
-      },
-      words: [],
-    });
+    this.noteNow =
+      (await this.storeService.todaysNote()) ||
+      createInstanceOfClass(Note, {
+        name: this.today,
+        note: this.result.final,
+        when: this.dateService.now,
+        drive: {
+          destFolderId: this.gdriveParentFolderId,
+        },
+        words: [],
+      });
     this.result.final = (this.noteNow && this.noteNow.note) || '';
     this.recognizerService.events.subscribe(
       ({ result, event, error }) => {
@@ -119,6 +141,10 @@ export class CreateStoryComponent implements OnInit {
     );
   }
 
+  noteDidChange(val: string) {
+    this.noteChange$.next(val);
+  }
+
   private resumeListeningDelayed() {
     window.setTimeout(() => {
       this.pauseListening = false;
@@ -132,7 +158,7 @@ export class CreateStoryComponent implements OnInit {
     this.mutableWordPanelData = this.immutableWordPanelData;
   }
 
-  private get immutableWordPanelData() {
+  private get immutableWordPanelData(): {context: IAccordianContext}{
     return {
       context: {
         word: {
@@ -141,8 +167,8 @@ export class CreateStoryComponent implements OnInit {
           meaning: '',
           dirtySection: WordSection.name,
           onClose: () => this.onCloseWordPanel(),
-          onChange: (panel: string, event: Event, index: number) =>
-            this.onTextChangeInWordPanel(panel, event, index),
+          onChange: (event: Event) =>
+            this.onTextChangeInWordPanel(event),
         },
       },
     };
@@ -220,15 +246,7 @@ export class CreateStoryComponent implements OnInit {
     }
   }
 
-  private saveNewlyCreatedWordInLocalStorage(){
-    const {example, meaning, name} = this.mutableWordPanelData.context.word;
-    const found = this.noteNow.words.find((word) => word.name === name);
-    if (!found){
-      this.noteNow.words.push({example: [...example], meaning, name});
-    }else {
-      const index = this.noteNow.words.indexOf(found);
-      this.noteNow.words[index] = {example: [...example], meaning, name};
-    }
+  private saveNoteInStore() {
     this.storeService
       .storeTodaysNote(this.noteNow)
       .catch(console.error)
@@ -237,15 +255,9 @@ export class CreateStoryComponent implements OnInit {
       });
   }
 
-  saveNote(event: Event){
-    const textarea = event.target as HTMLTextAreaElement;
-    this.noteNow.note = textarea.value;
-    this.storeService
-      .storeTodaysNote(this.noteNow)
-      .catch(console.error)
-      .then((data) => {
-        console.log('Data stored.');
-      });
+  saveNote(val: string) {
+    this.noteNow.note = val;
+    this.saveNoteInStore();
   }
 
   private processNoteResult(result: {
@@ -261,12 +273,14 @@ export class CreateStoryComponent implements OnInit {
     if (!result.isFinal) {
       if (intrimResult.length > this.result.intrim.length) {
         this.result.intrim = intrimResult;
+        this.invalidateNoteTextArea(`${this.intrimPrefix}${intrimResult}`);
       }
       return;
     }
     this.result.intrim = '';
     const processedResult = this.processNoteCommands(result.speech);
     this.result.final += ' ' + processedResult.result;
+    this.invalidateNoteTextArea(intrimResult);
     this.noteNow.note = this.result.final;
     this.storeService
       .storeTodaysNote(this.noteNow)
@@ -282,6 +296,10 @@ export class CreateStoryComponent implements OnInit {
     if (processedResult.shouldShowCreateWordPanel) {
       this.toggleCreateWordPanel();
     }
+  }
+
+  private invalidateNoteTextArea(str: string) {
+    this.textAreaValue = str;
   }
 
   private toggleCreateWordPanel() {
@@ -406,14 +424,8 @@ export class CreateStoryComponent implements OnInit {
       .catch(Promise.reject);
   }
 
-  private onTextChangeInWordPanel(panel: string, event: Event, index: number) {
-    const textarea = event.target as HTMLTextAreaElement;
-    if (panel === 'example'){
-      this.mutableWordPanelData.context.word.example[index] = textarea.value;
-    }else {
-      this.mutableWordPanelData.context.word[panel] = textarea.value;
-    }
-    this.saveNewlyCreatedWordInLocalStorage();
+  private onTextChangeInWordPanel(event: Event) {
+    this.saveNoteInStore();
   }
 
   toggleStart() {
@@ -443,13 +455,19 @@ export class CreateStoryComponent implements OnInit {
   }
 }
 
-interface IResult {
-  final: string;
-  intrim: string;
-}
-
-enum WordSection {
-  name,
-  meaning,
-  examples,
+class SpeechResult {
+  private finalInternal = '';
+  set final(v) {
+    this.finalInternal = v;
+  }
+  get final() {
+    return this.finalInternal;
+  }
+  private intrimInternal = '';
+  set intrim(v) {
+    this.intrimInternal = v;
+  }
+  get intrim() {
+    return this.intrimInternal;
+  }
 }
