@@ -53,6 +53,7 @@ export class CreateStoryComponent implements OnInit {
   wordResult = new SpeechResult();
   private pauseListening = false;
   noteChange$ = new Subject<string>();
+  private speechResultToDisplay = '';
   set textAreaValue(v) {
     /**
      * intrim:: prefix won't come from ngModel of textArea.
@@ -61,13 +62,14 @@ export class CreateStoryComponent implements OnInit {
      */
     if (v.startsWith(this.intrimPrefix)) {
       // intrim:: has 8 characters
-      this.result.intrim = v.slice(8);
+      this.speechResultToDisplay = v.slice(8);
       return;
     }
+    this.speechResultToDisplay = v;
     this.result.final = v;
   }
   get textAreaValue() {
-    return this.result.final === '' ? this.result.intrim : this.result.final;
+    return this.speechResultToDisplay;
   }
   started = false;
   private noteNow?: Note;
@@ -85,7 +87,7 @@ export class CreateStoryComponent implements OnInit {
   async ngOnInit() {
     this.noteChange$
       .pipe(
-        debounceTime(2000))
+        debounceTime(1000))
       .subscribe((val) => {
         this.saveNote(val);
       });
@@ -119,6 +121,7 @@ export class CreateStoryComponent implements OnInit {
         words: [],
       });
     this.result.final = (this.noteNow && this.noteNow.note) || '';
+    this.invalidateNoteTextArea(this.result.final);
     this.recognizerService.events.subscribe(
       ({ result, event, error }) => {
         if (event === SpeechEvent.didStartListening) {
@@ -273,14 +276,16 @@ export class CreateStoryComponent implements OnInit {
     if (!result.isFinal) {
       if (intrimResult.length > this.result.intrim.length) {
         this.result.intrim = intrimResult;
-        this.invalidateNoteTextArea(`${this.intrimPrefix}${intrimResult}`);
+        if (intrimResult !== '') {
+          this.invalidateNoteTextArea(`${this.intrimPrefix}${intrimResult}`);
+        }
       }
       return;
     }
     this.result.intrim = '';
     const processedResult = this.processNoteCommands(result.speech);
     this.result.final += ' ' + processedResult.result;
-    this.invalidateNoteTextArea(intrimResult);
+    this.invalidateNoteTextArea(this.result.final);
     this.noteNow.note = this.result.final;
     this.storeService
       .storeTodaysNote(this.noteNow)
