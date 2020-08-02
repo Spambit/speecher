@@ -11,6 +11,7 @@ import { Template } from '@angular/compiler/src/render3/r3_ast';
 import { TemplateService } from '@services/template.service';
 import { AccordianComponent } from '@components/accordian/accordian.component';
 import { LocalStorageService } from '@services/store.service';
+import { MockData } from 'src/app/testdata/allnotes';
 
 @Component({
   selector: 'speecher-allnotes',

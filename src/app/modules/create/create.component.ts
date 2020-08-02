@@ -19,6 +19,7 @@ import { TemplateService } from '@services/template.service';
 import { AccordianComponent } from '@components/accordian/accordian.component';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { MockData } from 'src/app/testdata/allnotes';
 
 @Component({
   selector: 'speecher-home',
@@ -49,7 +50,7 @@ export class CreateStoryComponent implements OnInit {
     header: this.today,
   };
   toastTemplate: TemplateRef<any>;
-  result = new SpeechResult();
+  private noteSpeechResult = new SpeechResult();
   wordResult = new SpeechResult();
   private pauseListening = false;
   noteChange$ = new Subject<string>();
@@ -66,7 +67,7 @@ export class CreateStoryComponent implements OnInit {
       return;
     }
     this.speechResultToDisplay = v;
-    this.result.final = v;
+    this.noteSpeechResult.final = v;
   }
   get textAreaValue() {
     return this.speechResultToDisplay;
@@ -113,15 +114,15 @@ export class CreateStoryComponent implements OnInit {
       (await this.storeService.todaysNote()) ||
       createInstanceOfClass(Note, {
         name: this.today,
-        note: this.result.final,
+        note: this.noteSpeechResult.final,
         when: this.dateService.now,
         drive: {
           destFolderId: this.gdriveParentFolderId,
         },
         words: [],
       });
-    this.result.final = (this.noteNow && this.noteNow.note) || '';
-    this.invalidateNoteTextArea(this.result.final);
+    this.noteSpeechResult.final = (this.noteNow && this.noteNow.note) || '';
+    this.invalidateNoteTextArea(this.noteSpeechResult.final);
     this.recognizerService.events.subscribe(
       ({ result, event, error }) => {
         if (event === SpeechEvent.didStartListening) {
@@ -272,21 +273,21 @@ export class CreateStoryComponent implements OnInit {
       return;
     }
 
-    const intrimResult = this.result.final + ' ' + result.speech;
+    const intrimResult = this.noteSpeechResult.final + ' ' + result.speech;
     if (!result.isFinal) {
-      if (intrimResult.length > this.result.intrim.length) {
-        this.result.intrim = intrimResult;
+      if (intrimResult.length > this.noteSpeechResult.intrim.length) {
+        this.noteSpeechResult.intrim = intrimResult;
         if (intrimResult !== '') {
           this.invalidateNoteTextArea(`${this.intrimPrefix}${intrimResult}`);
         }
       }
       return;
     }
-    this.result.intrim = '';
+    this.noteSpeechResult.intrim = '';
     const processedResult = this.processNoteCommands(result.speech);
-    this.result.final += ' ' + processedResult.result;
-    this.invalidateNoteTextArea(this.result.final);
-    this.noteNow.note = this.result.final;
+    this.noteSpeechResult.final += ' ' + processedResult.result;
+    this.invalidateNoteTextArea(this.noteSpeechResult.final);
+    this.noteNow.note = this.noteSpeechResult.final;
     this.storeService
       .storeTodaysNote(this.noteNow)
       .catch(console.error)
@@ -307,13 +308,13 @@ export class CreateStoryComponent implements OnInit {
     this.textAreaValue = str;
   }
 
-  private toggleCreateWordPanel() {
+  private toggleCreateWordPanel(data?: {context: IAccordianContext}) {
     this.wordPanelVisible = !this.wordPanelVisible;
     if (!this.wordPanelVisible) {
       return;
     }
 
-    this.toastService.show(this.toastTemplate, this.mutableWordPanelData);
+    this.toastService.show(this.toastTemplate, data || this.mutableWordPanelData);
     this.pauseListening = true;
     this.speakService.speak('Say the word');
   }

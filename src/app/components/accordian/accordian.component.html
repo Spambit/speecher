@@ -11,9 +11,9 @@
         </div>
       </ng-template>
       <ng-template ngbPanelContent>
-        <textarea name="meaning" rows="1" spellcheck='false'
+        <textarea name="meaning" rows="2" spellcheck='false'
         [(ngModel)]="word.meaning" (ngModelChange)="word.onChange($event)"
-          class="border-0 form-control bg-dark"></textarea>
+          class="speecher-font-ms border-0 form-control bg-dark"></textarea>
       </ng-template>
     </ngb-panel>
     <ngb-panel id='examples' *ngIf="word.example.length !== 0">
@@ -23,7 +23,7 @@
       <ng-template ngbPanelContent>
         <ng-template ngFor let-example [ngForOf]="word.example" let-i="index" [ngForTrackBy]="identify">
           <textarea [(ngModel)]="word.example[i]" (ngModelChange)="word.onChange($event)" rows="1" spellcheck='false'
-            class="border-0 form-control bg-dark"></textarea>
+            class="speecher-font-ms border-0 form-control bg-dark"></textarea>
           <hr />
         </ng-template>
       </ng-template>

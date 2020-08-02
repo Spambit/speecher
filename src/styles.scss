@@ -85,6 +85,14 @@ body {
   word-spacing: 0.04em;
 }
 
+.speecher-font-xs {
+  font-size: .5em;
+}
+
+.speecher-font-ms {
+  font-size: .8em;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }
@@ -108,3 +116,7 @@ label:focus,
 }
 
 $speecher-nav-bar-height: 44px;
+
+.text-lightyellow {
+  color: rgba(255, 240, 29, 0.555) !important;
+}
