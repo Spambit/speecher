@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1596883578378,
+  "timestamp": 1596884149849,
   "index": "https://spambit.github.io/speecher/index.html",
   "assetGroups": [
     {
@@ -18,8 +18,8 @@
         "https://spambit.github.io/speecher/8-es5.cc3b39fe14dd15bccf26.js",
         "https://spambit.github.io/speecher/favicon.ico",
         "https://spambit.github.io/speecher/index.html",
-        "https://spambit.github.io/speecher/main-es2015.8eb9ab5c49805f277e64.js",
-        "https://spambit.github.io/speecher/main-es5.8eb9ab5c49805f277e64.js",
+        "https://spambit.github.io/speecher/main-es2015.89ad3d87cdb5a0c09020.js",
+        "https://spambit.github.io/speecher/main-es5.89ad3d87cdb5a0c09020.js",
         "https://spambit.github.io/speecher/manifest.webmanifest",
         "https://spambit.github.io/speecher/polyfills-es2015.7286fd8aeafe89a8e929.js",
         "https://spambit.github.io/speecher/polyfills-es5.aa9d65a514badb4ce2d0.js",
@@ -101,9 +101,9 @@
     "https://spambit.github.io/speecher/assets/icons/icon-72x72.png": "c457e56089a36952cd67156f9996bc4ce54a5ed9",
     "https://spambit.github.io/speecher/assets/icons/icon-96x96.png": "3914125a4b445bf111c5627875fc190f560daa41",
     "https://spambit.github.io/speecher/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
-    "https://spambit.github.io/speecher/index.html": "38859d8e5aaa2bf7911b4d091e7a5f37ead1cfdf",
-    "https://spambit.github.io/speecher/main-es2015.8eb9ab5c49805f277e64.js": "3666a1bbabaf631427a2b7a81392e62283f32e21",
-    "https://spambit.github.io/speecher/main-es5.8eb9ab5c49805f277e64.js": "a14d91b487339a87c91b3d857df4745e536fb837",
+    "https://spambit.github.io/speecher/index.html": "62efaeb541936cd69155f8eadfc441a81ad9f563",
+    "https://spambit.github.io/speecher/main-es2015.89ad3d87cdb5a0c09020.js": "d80d58396881ebf9d97d70f9cec091de503736ac",
+    "https://spambit.github.io/speecher/main-es5.89ad3d87cdb5a0c09020.js": "f10b66de30748bde28501ca6695f8152683d95e8",
     "https://spambit.github.io/speecher/manifest.webmanifest": "9a36f93329b1cce7a5208bd296a2c5abb4c080f4",
     "https://spambit.github.io/speecher/montserrat-latin-100.8d7d79679b70dbe27172.woff2": "4834dbe53d11d7d8fbd4b03402cc3694fa00a0ce",
     "https://spambit.github.io/speecher/montserrat-latin-100.ec38980a9e0119a379e2.woff": "20f4ec409a5e86ea89fe26be42fdabfd11dc867c",
