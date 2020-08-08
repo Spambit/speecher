@@ -14,7 +14,7 @@ import { environment } from '../environments/environment';
     SharedModule,
     RouterModule.forRoot(routes),
     ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: true // environment.production,
+      enabled: true, // environment.production,
     }),
   ],
   bootstrap: [AppComponent],

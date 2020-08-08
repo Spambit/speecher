@@ -2,9 +2,17 @@
   <div class="jumbotron">
     <h1 class="display-4 text-lightyellow">Hello, <strong>Speecher!</strong></h1>
     <hr class="my-4">
-    <p class="lead">Read English everyday preferably in short amount, Note your english story, Pick unknown words and record them for future reference.</p>
+    <p class="lead">Read English everyday preferably in short amount, Note your english story, Pick unknown words and
+      record them for future reference.</p>
     <hr class="my-4">
     <p>Explore bunch of other tools to improve your english.</p>
+    <p *ngIf="shouldShowAddToHomeBtn">And finally it's user experience is best if you use as an app. Add
+      <strong>speecher</strong> to
+      your home screen.
+    </p>
+    <p *ngIf="shouldShowAddToHomeBtn" class="lead">
+      <button class="btn btn-success btn-lg" (click)="addToHomeScreen()" role="button">Add To Home</button>
+    </p>
   </div>
   <div class="d-flex flex-column justify-content-center speecher-menu">
     <button type="button" (click)="createTodaysNote()" class="btn btn-success menu-item">Create Today's Note</button>
