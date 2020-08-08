@@ -19,7 +19,6 @@ import { TemplateService } from '@services/template.service';
 import { AccordianComponent } from '@components/accordian/accordian.component';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { MockData } from 'src/app/testdata/allnotes';
 
 @Component({
   selector: 'speecher-home',
