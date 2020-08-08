@@ -5,11 +5,13 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
     CommonModule,
     RouterModule,
+    FormsModule,
     NgbModule,
     HttpClientModule,
     FontAwesomeModule,
@@ -17,6 +19,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
   exports: [
     CommonModule,
     RouterModule,
+    FormsModule,
     NgbModule,
     HttpClientModule,
     FontAwesomeModule,

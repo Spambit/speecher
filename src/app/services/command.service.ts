@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IFilterResult, ICommand, Filters } from './filter.result';
+import { IFilterResult, ICommand, Filter } from './filter.result';
 import { COMMANDS } from './command.names';
 
 @Injectable({
@@ -7,7 +7,7 @@ import { COMMANDS } from './command.names';
 })
 export class CommandService {
   constructor() {}
-  filter(str: string, filters: Filters[] = []): IFilterResult[] {
+  filter(str: string, filters: Filter[] = []): IFilterResult[] {
     str = str.toLowerCase();
     const filteredCommands =
       filters.length === 0

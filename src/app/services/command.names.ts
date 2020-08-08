@@ -1,10 +1,10 @@
-import { ICommand, Filters } from './filter.result';
+import { ICommand, Filter } from './filter.result';
 
 export const COMMANDS: ICommand[] = [
-  { id: Filters.start, names: ['command'] },
-  { id: Filters.comma, names: ['coma', 'comma'], replaceWith: ', ' },
+  { id: Filter.start, names: ['command'] },
+  { id: Filter.comma, names: ['coma', 'comma'], replaceWith: ', ' },
   {
-    id: Filters.savenote,
+    id: Filter.savenote,
     names: [
       'save note',
       'save this note',
@@ -14,14 +14,14 @@ export const COMMANDS: ICommand[] = [
       'create a note of it',
     ],
   },
-  { id: Filters.dot, names: ['dot'], replaceWith: '. ' },
+  { id: Filter.dot, names: ['dot'], replaceWith: '. ' },
   {
-    id: Filters.newpara,
+    id: Filter.newpara,
     names: ['new para', 'new paida'],
     replaceWith: '\n\n\t\t',
   },
   {
-    id: Filters.createword,
+    id: Filter.createword,
     names: [
       'add the word',
       'create the word',
@@ -30,6 +30,40 @@ export const COMMANDS: ICommand[] = [
       'create word',
       'add word',
       'adwords'
+    ],
+    replaceWith: '',
+  },
+  {
+    id: Filter.wordname,
+    names: [
+      'add name',
+      'at name',
+      'ad name',
+    ],
+    replaceWith: '',
+  },
+  {
+    id: Filter.wordexample,
+    names: [
+      'add example',
+      'at example',
+      'ad example',
+    ],
+    replaceWith: '',
+  },
+  {
+    id: Filter.wordmeaning,
+    names: [
+      'at meaning',
+      'ad meaning',
+      'add meaning',
+    ],
+    replaceWith: '',
+  },
+  {
+    id: Filter.wordclose,
+    names: [
+      'close now',
     ],
     replaceWith: '',
   },

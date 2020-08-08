@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { TemplateWrapperBase } from '@services/template.service';
-import { Word } from '@services/filter.result';
+import { IWord } from '@services/filter.result';
 
 @Component({
     selector: 'speecher-toast-accordian',

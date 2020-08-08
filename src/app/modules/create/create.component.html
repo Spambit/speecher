@@ -1,7 +1,6 @@
 <speecher-nav [config]='navConfig'></speecher-nav>
 <section class='home-speech'>
-  <textarea spellcheck='false' class="form-control bg-transparent">
-    {{result.intrim !== ''? result.intrim : result.final}}
+  <textarea [(ngModel)]="textAreaValue" (ngModelChange)="noteDidChange($event)" spellcheck='false' class="speecher-font-big form-control bg-transparent">
   </textarea>
 </section>
-<speecher-toasts *ngIf='createWordPanelVisible' aria-live="polite" aria-atomic="true"></speecher-toasts>
+<speecher-toasts *ngIf='wordPanelVisible' aria-live="polite" aria-atomic="true"></speecher-toasts>

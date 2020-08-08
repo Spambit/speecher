@@ -1,1 +1,6 @@
+@import '../../../styles.scss';
+textarea {
+  color: $textarea-color !important;
+  resize: none;
+}
 
