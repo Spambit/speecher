@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1597407702244,
+  "timestamp": 1597408286833,
   "index": "https://spambit.github.io/speecher/index.html",
   "assetGroups": [
     {
@@ -101,7 +101,7 @@
     "https://spambit.github.io/speecher/assets/icons/icon-72x72.png": "c457e56089a36952cd67156f9996bc4ce54a5ed9",
     "https://spambit.github.io/speecher/assets/icons/icon-96x96.png": "3914125a4b445bf111c5627875fc190f560daa41",
     "https://spambit.github.io/speecher/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
-    "https://spambit.github.io/speecher/index.html": "76fc21658672499c3c501208886a0e4ae19515b5",
+    "https://spambit.github.io/speecher/index.html": "afc72a813490ff325cddf2b16cd6e6b9444093a0",
     "https://spambit.github.io/speecher/main-es2015.daa31fff9998c988554c.js": "2011ee1d86ceddb3bf85876b924a0578b3cc639e",
     "https://spambit.github.io/speecher/main-es5.daa31fff9998c988554c.js": "6cacd22d9f6c544d661b87bd5171584ae33239e5",
     "https://spambit.github.io/speecher/manifest.webmanifest": "9a36f93329b1cce7a5208bd296a2c5abb4c080f4",
