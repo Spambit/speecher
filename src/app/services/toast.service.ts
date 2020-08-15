@@ -11,15 +11,16 @@ export class ToastService {
     this.show('I am a standard toast');
   }
 
-  showSuccess(successTpl: string | TemplateRef<any> = '') {
+  showSuccess(successTpl: string | TemplateRef<any> = '', duration: number = 3000) {
     this.show(successTpl, {
       classname: 'bg-success text-light',
-      header: 'Success'
+      header: 'Success',
+      delay: duration
     });
   }
 
-  showDanger(dangerTpl: string = '') {
-    this.show(dangerTpl, { classname: 'bg-danger text-light'});
+  showDanger(dangerTpl: string = '', duration: number = 3000) {
+    this.show(dangerTpl, { classname: 'bg-danger text-light', delay: duration});
   }
 
   remove(toast) {

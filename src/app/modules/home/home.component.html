@@ -1,25 +1,39 @@
 <div class="d-flex flex-column flex-md-row justify-content-between speecher-home">
   <div class="jumbotron">
-    <h1 class="display-4 text-lightyellow">Hello, <strong>Speecher!</strong></h1>
+    <div class="d-flex flex-row justify-content-start ml-0 mr-0 p-1">
+      <img *ngIf="isLoggedIn" class="rounded mr-2 speecher-avatar" [src]="user.avatar">
+      <h1 *ngIf="!isLoggedIn" class="display-4 text-yellow">Hello, <strong>Speecher!</strong></h1>
+      <ul *ngIf="isLoggedIn" class="list-group list-group-flush speecher-user-info">
+        <li class="list-group-item text-yellow pt-0">{{user.name}}</li>
+        <li class="list-group-item">{{user.email}}</li>
+      </ul>
+    </div>
     <hr class="my-4">
-    <p class="lead">Read English everyday preferably in short amount, Note your english story, Pick unknown words and
-      record them for future reference.</p>
+    <p class="lead">Read English everyday preferably in short amount. Note your english story. Pick unknown words or phrases, and
+      save them in your google drive for future reference.</p>
     <hr class="my-4">
-    <p>Explore bunch of other tools to improve your english.</p>
-    <p *ngIf="shouldShowAddToHomeBtn">And finally it's user experience is best if you use as an app. Add
-      <strong>speecher</strong> to
-      your home screen.
+    <p *ngIf="!isLoggedIn">You should login to google to save notes for all your devices.
+      Don't worry! We have access only to single folder in your google drive named <strong>Speecher-Data-Folder</strong>.
     </p>
-    <p *ngIf="shouldShowAddToHomeBtn" class="lead">
-      <button class="btn btn-success btn-lg" (click)="addToHomeScreen()" role="button">Add To Home</button>
+    <p class="lead">
+      <button *ngIf="!isLoggedIn" class="btn btn-success btn-lg" (click)="login()" role="button">Login</button>
+      <button *ngIf="isLoggedIn" class="btn btn-success btn-lg" (click)="logout()" role="button">Logout</button>
     </p>
   </div>
   <div class="d-flex flex-column justify-content-center speecher-menu">
-    <button type="button" (click)="createTodaysNote()" class="btn btn-success menu-item">Create Today's Note</button>
-    <button type="button" (click)="showAllNotes()" class="btn btn-success menu-item">My Days</button>
-    <button type="button" class="btn btn-success menu-item">All My Words</button>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item list-group-item-action text-darkgray text-center">Create Today's Note</li>
+      <li class="list-group-item list-group-item-action text-darkgray text-center active">My Days</li>
+      <li class="list-group-item list-group-item-action text-darkgray text-center">All My Words</li>
+      <li class="list-group-item list-group-item-action text-darkgray text-center">All My Phrases</li>
+      <li class="list-group-item list-group-item-action text-darkgray text-center">Pick 5 Randoms</li>
+      <li class="list-group-item list-group-item-action text-darkgray text-center">A Random Sweet Old Day</li>
+    </ul>
+    <!-- <button type="button" (click)="createTodaysNote()" class="btn btn-success menu-item">Create Today's Note</button>
+    <button type="button" (click)="showAllNotes()" class="btn btn-success menu-item">My Days</button> -->
+    <!-- <button type="button" class="btn btn-success menu-item">All My Words</button>
     <button type="button" class="btn btn-success menu-item">All My Phrases</button>
     <button type="button" class="btn btn-success menu-item">Pick 5 Randoms</button>
-    <button type="button" class="btn btn-success menu-item">A Random Sweet Old Day</button>
+    <button type="button" class="btn btn-success menu-item">A Random Sweet Old Day</button> -->
   </div>
 </div>

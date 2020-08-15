@@ -12,11 +12,33 @@
 .speecher-menu {
   width: 100%;
   height: auto;
-  padding: 10px;
-  .menu-item {
-    width: 100%;
-    height: 50px;
-    margin-bottom: 10px;
-    border-radius: 10px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  li {
+    border: 1px solid $gray-700;
+    &.disabled {
+      color: $gray-600 !important;
+    }
+    &.active {
+      color: $blue !important;
+      background-color: transparent !important;
+    }
+  }
+  li:hover, li:focus {
+    color: $white !important;
+    background-color: transparent !important;
+  }
+}
+
+.speecher-avatar {
+  width: 80px;
+  height: 80px;
+}
+
+.speecher-user-info {
+  li {
+    border: 1px solid $yellow;
   }
 }

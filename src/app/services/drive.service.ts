@@ -24,6 +24,10 @@ export class DriveService {
     );
   }
 
+  isLoggedIn() {
+    return this.loginService.isLoggedIn({ forScope: this.loginOptions.scope });
+  }
+
   findFile({ id }: { id: string }): Promise<boolean> {
     return this.loadGoogleDrive().then(() => {
       return gapi.client.drive.files
@@ -36,6 +40,10 @@ export class DriveService {
         .then((res) => (res.status === 200 ? true : false))
         .catch(() => false);
     });
+  }
+
+  login(): Promise<void>{
+    return this.loadGoogleDrive();
   }
 
   private loadGoogleDrive(): Promise<void> {

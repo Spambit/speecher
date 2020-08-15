@@ -117,6 +117,10 @@ label:focus,
 
 $speecher-nav-bar-height: 44px;
 
-.text-lightyellow {
-  color: rgba(255, 240, 29, 0.555) !important;
+.text-yellow {
+  color: $yellow !important;
+}
+
+.text-darkgray {
+  color: $gray-400 !important;
 }

@@ -8,6 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
+    "deploy": "ng deploy --base-href=https://spambit.github.io/speecher/",
     "starthttps":"ng serve --ssl --ssl-key ~/Documents/Certs/key.pem  --ssl-cert ~/Documents/Certs/cert.pem"
   },
   "private": true,

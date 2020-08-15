@@ -126,9 +126,11 @@ export class CreateStoryComponent implements OnInit {
       ({ result, event, error }) => {
         if (event === SpeechEvent.didStartListening) {
           this.started = true;
+          this.navConfig.button.iconColor = this.micColor();
         }
         if (event === SpeechEvent.didStopListening) {
           this.started = false;
+          this.navConfig.button.iconColor = this.micColor();
         }
         if (event === SpeechEvent.didReceiveResult) {
           if (!this.pauseListening) {

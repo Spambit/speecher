@@ -6,7 +6,7 @@ declare var gapi: any;
 
 @Injectable({ providedIn: 'root' })
 export class LoginService {
-  private login$: Subject<boolean> = new Subject();
+  readonly login$: Subject<boolean> = new Subject();
   private googleAuth: any;
   constructor() {
     this.loadGoogleApi();
@@ -62,6 +62,19 @@ export class LoginService {
     return user.hasGrantedScopes(forScope);
   }
 
+  getUserInfo(): { avatar: string, name: string, email: string, shortName: string } {
+    if (!this.googleAuth || !this.googleAuth.currentUser) {
+      return;
+    }
+    const user = this.googleAuth.currentUser.get().getBasicProfile();
+    return {
+      avatar: user.getImageUrl(),
+      name: user.getName(),
+      email: user.getEmail(),
+      shortName: user.getFamilyName()
+    };
+  }
+
   private googleApiDidLoad() {
     gapi.load('client:auth2', () => {
       console.log('Google auth loaded.');
@@ -83,14 +96,12 @@ export class LoginService {
     this.initClient({ scope, apiKey: key, clientId, discoveryDocs })
       .then((_) => {
         if (this.googleAuth.isSignedIn.get()) {
-          Utils.defer(() => this.login$.next(true));
+          this.login$.next(true);
         } else {
           const builder = new gapi.auth2.SigninOptionsBuilder();
           builder.setPrompt('select_account');
           builder.setScope('profile').setScope('email');
-          this.googleAuth.signIn(builder).then(() => {
-            this.login$.next(true);
-          }).catch((e) => {
+          this.googleAuth.signIn(builder).catch((e) => {
             this.throwDeferedError(e);
           });
         }
@@ -104,7 +115,7 @@ export class LoginService {
     if (!this.googleAuth) {
       this.throwDeferedError('Google Auth was not loaded.');
     } else if (!this.googleAuth.isSignedIn.get()) {
-      Utils.defer(() => this.login$.next(true));
+      Utils.defer(() => this.login$.next(false));
     } else {
       this.googleAuth.signOut().catch((e) => {
         this.throwDeferedError('logout failed');
