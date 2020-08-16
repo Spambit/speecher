@@ -21,7 +21,7 @@ import { MockData } from 'src/app/testdata/allnotes';
 export class AllNotesComponent implements OnInit {
   navConfig: NavConfig = {
     header: 'All Stories',
-    button: { show: false },
+    button: { simple: { show: false } },
   };
   notes: Note[] = [];
   selectedItem: HTMLElement;

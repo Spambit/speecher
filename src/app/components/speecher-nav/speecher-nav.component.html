@@ -1,6 +1,24 @@
 <div class='speecher-nav'>
   <small>{{config.header}}</small>
-  <button *ngIf='config.button.show' type="button" class="btn bg-transparent" (click)='config.button.click($event)'>
-    <fa-icon [style.color]="config.button.iconColor" [icon]="config.button.icon"></fa-icon>
-  </button>
+  <ng-template [ngIf]="config.button.dropdown" [ngIfElse]="simple">
+    <div ngbDropdown container="body">
+      <button type="button" ngbDropdownToggle class="btn bg-transparent" data-toggle="dropdown">
+        {{config.button.dropdownTitle}}
+      </button>
+      <div ngbDropdownMenu>
+        <ul class="list-group list-group-flush">
+          <li *ngFor="let dropdownItem of config.button.dropdownItems" ngbDropdownItem
+            class="list-group-item list-group-item-action text-darkgray text-center"
+            (click)="dropdownItem.click($event, dropdownItem)">{{dropdownItem.text}}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #simple>
+    <button *ngIf='config.button.simple.show' type="button" class="btn bg-transparent"
+      (click)='config.button.simple.click($event)'>
+      <fa-icon [style.color]="config.button.simple.iconColor" [icon]="config.button.simple.icon"></fa-icon>
+    </button>
+  </ng-template>
 </div>

@@ -1,3 +1,4 @@
+<speecher-nav class='d-sm-block d-md-none' [config]='navConfig'></speecher-nav>
 <div class="d-flex flex-column flex-md-row justify-content-between speecher-home">
   <div class="jumbotron">
     <div class="d-flex flex-row justify-content-start ml-0 mr-0 p-1">
@@ -20,20 +21,12 @@
       <button *ngIf="isLoggedIn" class="btn btn-success btn-lg" (click)="logout()" role="button">Logout</button>
     </p>
   </div>
-  <div class="d-flex flex-column justify-content-center speecher-menu">
+  <div class="d-none d-md-flex flex-column justify-content-center speecher-menu">
     <ul class="list-group list-group-flush">
-      <li class="list-group-item list-group-item-action text-darkgray text-center">Create Today's Note</li>
-      <li class="list-group-item list-group-item-action text-darkgray text-center active">My Days</li>
-      <li class="list-group-item list-group-item-action text-darkgray text-center">All My Words</li>
-      <li class="list-group-item list-group-item-action text-darkgray text-center">All My Phrases</li>
-      <li class="list-group-item list-group-item-action text-darkgray text-center">Pick 5 Randoms</li>
-      <li class="list-group-item list-group-item-action text-darkgray text-center">A Random Sweet Old Day</li>
+      <li *ngFor="let dropdownItem of navConfig.button.dropdownItems"
+            class="list-group-item list-group-item-action text-darkgray text-center"
+            (click)="dropdownItem.click($event, dropdownItem)">{{dropdownItem.text}}
+      </li>
     </ul>
-    <!-- <button type="button" (click)="createTodaysNote()" class="btn btn-success menu-item">Create Today's Note</button>
-    <button type="button" (click)="showAllNotes()" class="btn btn-success menu-item">My Days</button> -->
-    <!-- <button type="button" class="btn btn-success menu-item">All My Words</button>
-    <button type="button" class="btn btn-success menu-item">All My Phrases</button>
-    <button type="button" class="btn btn-success menu-item">Pick 5 Randoms</button>
-    <button type="button" class="btn btn-success menu-item">A Random Sweet Old Day</button> -->
   </div>
 </div>

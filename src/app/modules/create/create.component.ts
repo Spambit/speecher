@@ -7,7 +7,13 @@ import {
 import { SpeecherRecognizerService } from '@services/speech.service';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import { CommandService } from '@services/command.service';
-import { Filter, Note, SpeechEvent, IAccordianContext, WordSection } from '@services/filter.result';
+import {
+  Filter,
+  Note,
+  SpeechEvent,
+  IAccordianContext,
+  WordSection,
+} from '@services/filter.result';
 import { LocalStorageService } from '@services/store.service';
 import { DateService } from '@services/date.service';
 import { DriveService } from '@services/drive.service';
@@ -41,10 +47,12 @@ export class CreateStoryComponent implements OnInit {
   private intrimPrefix = 'intrim::';
   navConfig: NavConfig = {
     button: {
-      iconColor: this.micColor(),
-      show: true,
-      icon: faMicrophone,
-      click: (e: Event) => this.toggleStart(),
+      simple: {
+        iconColor: this.micColor(),
+        show: true,
+        icon: faMicrophone,
+        click: (e: Event) => this.toggleStart(),
+      },
     },
     header: this.today,
   };
@@ -85,12 +93,9 @@ export class CreateStoryComponent implements OnInit {
     return this.wordPanelVisibleInternal;
   }
   async ngOnInit() {
-    this.noteChange$
-      .pipe(
-        debounceTime(1000))
-      .subscribe((val) => {
-        this.saveNote(val);
-      });
+    this.noteChange$.pipe(debounceTime(1000)).subscribe((val) => {
+      this.saveNote(val);
+    });
     this.speakService.event$.subscribe(
       (event) => {
         if (event === SpeechEvent.didStopSpeaking) {
@@ -126,11 +131,11 @@ export class CreateStoryComponent implements OnInit {
       ({ result, event, error }) => {
         if (event === SpeechEvent.didStartListening) {
           this.started = true;
-          this.navConfig.button.iconColor = this.micColor();
+          this.navConfig.button.simple.iconColor = this.micColor();
         }
         if (event === SpeechEvent.didStopListening) {
           this.started = false;
-          this.navConfig.button.iconColor = this.micColor();
+          this.navConfig.button.simple.iconColor = this.micColor();
         }
         if (event === SpeechEvent.didReceiveResult) {
           if (!this.pauseListening) {
@@ -163,7 +168,7 @@ export class CreateStoryComponent implements OnInit {
     this.mutableWordPanelData = this.immutableWordPanelData;
   }
 
-  private get immutableWordPanelData(): {context: IAccordianContext}{
+  private get immutableWordPanelData(): { context: IAccordianContext } {
     return {
       context: {
         word: {
@@ -172,8 +177,7 @@ export class CreateStoryComponent implements OnInit {
           meaning: '',
           dirtySection: WordSection.name,
           onClose: () => this.onCloseWordPanel(),
-          onChange: (event: Event) =>
-            this.onTextChangeInWordPanel(event),
+          onChange: (event: Event) => this.onTextChangeInWordPanel(event),
         },
       },
     };
@@ -309,13 +313,16 @@ export class CreateStoryComponent implements OnInit {
     this.textAreaValue = str;
   }
 
-  private toggleCreateWordPanel(data?: {context: IAccordianContext}) {
+  private toggleCreateWordPanel(data?: { context: IAccordianContext }) {
     this.wordPanelVisible = !this.wordPanelVisible;
     if (!this.wordPanelVisible) {
       return;
     }
 
-    this.toastService.show(this.toastTemplate, data || this.mutableWordPanelData);
+    this.toastService.show(
+      this.toastTemplate,
+      data || this.mutableWordPanelData
+    );
     this.pauseListening = true;
     this.speakService.speak('Say the word');
   }

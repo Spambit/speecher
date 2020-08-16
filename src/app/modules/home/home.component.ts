@@ -4,6 +4,8 @@ import * as AppRoutes from '../../routes';
 import { LoginService } from '@services/login.service';
 import { DriveService } from '@services/drive.service';
 import { ToastService } from '@services/toast.service';
+import { NavConfig, NavDropDownItem } from '@components/speecher-nav/speecher-nav.component';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'speecher-home',
@@ -27,6 +29,38 @@ export class HomeComponent implements OnInit {
     email?: string;
     shortName?: string;
   } = {};
+  navConfig: NavConfig = {
+    button: {
+      dropdown: true,
+      dropdownTitle: 'Start Now',
+      dropdownItems: [
+        {
+          text: `Create Today's Note`,
+          click: (e, item) => this.createTodaysNote(),
+        },
+        {
+          text: `My Days`,
+          click: (e, item) => this.showAllNotes(),
+        },
+        {
+          text: `All My Words`,
+          click: (e, item) => {},
+        },
+        {
+          text: `All My Phrases`,
+          click: (e, item) => {},
+        },
+        {
+          text: `Pick 5 Randoms`,
+          click: (e, item) => {},
+        },
+        {
+          text: `A Random Sweet Old Day`,
+          click: (e, item) => {},
+        }
+      ]
+    },
+  };
   ngOnInit() {
     this.loginService.login$.subscribe({
       next: (loggedIn) => {
@@ -40,7 +74,6 @@ export class HomeComponent implements OnInit {
         this.loginFail(err);
       },
     });
-    // setInterval(() => { this.isLoggedIn = !this.isLoggedIn; }, 5000);
   }
 
   createTodaysNote() {

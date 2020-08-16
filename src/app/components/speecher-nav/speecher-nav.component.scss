@@ -14,3 +14,13 @@
   }
   z-index: 1;
 }
+
+.dropdown-menu {
+  background-color: $gray-600;
+  .dropdown-item {
+    background-color: $gray-600;
+    &:hover, &:focus {
+      background-color: $gray-700;
+    }
+  }
+}

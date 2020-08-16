@@ -1,5 +1,5 @@
 @import "./../../../styles.scss";
-:host{
+:host {
   font-family: Montserrat !important;
 }
 .speecher-home {
@@ -17,7 +17,7 @@
   padding-top: 10px;
   padding-bottom: 10px;
   li {
-    border: 1px solid $gray-700;
+    border: 1px solid $gray-600;
     &.disabled {
       color: $gray-600 !important;
     }
@@ -26,7 +26,8 @@
       background-color: transparent !important;
     }
   }
-  li:hover, li:focus {
+  li:hover,
+  li:focus {
     color: $white !important;
     background-color: transparent !important;
   }

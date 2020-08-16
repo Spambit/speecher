@@ -6,22 +6,31 @@ import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
   templateUrl: 'speecher-nav.component.html',
   styleUrls: ['speecher-nav.component.scss'],
 })
-export class SpeecherNavComponent implements OnInit{
-  constructor(){}
+export class SpeecherNavComponent implements OnInit {
+  constructor() {}
   @Input() config?: NavConfig = {
     header: '',
-    button: { show: false },
+    button: { simple: { show: false }, dropdown: false },
   };
-  ngOnInit() {
-  }
+  ngOnInit() {}
 }
 
 export interface NavConfig {
   button?: {
-    iconColor?: string;
-    show: boolean;
-    icon?: IconDefinition;
-    click?: (e: Event) => void;
+    simple?: {
+      iconColor?: string;
+      show: boolean;
+      icon?: IconDefinition;
+      click?: (e: Event) => void;
+    };
+    dropdownTitle?: string;
+    dropdown?: boolean;
+    dropdownItems?: NavDropDownItem[];
   };
   header?: string;
+}
+
+export interface NavDropDownItem {
+  click?: (e: Event, item: NavDropDownItem) => void;
+  text?: string;
 }
