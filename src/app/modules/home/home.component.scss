@@ -7,6 +7,7 @@
   height: 100%;
   padding: 10px;
   justify-content: center;
+  overflow: hidden;
 }
 
 .speecher-menu {
@@ -40,6 +41,17 @@
 
 .speecher-user-info {
   li {
-    border: 1px solid $yellow;
+    border-color: $yellow;
+  }
+  @media (max-width: 575.98px) {
+    .sm-xx-small-font {
+      font-size: 2.5vw;
+    }
+    .sm-x-small-font {
+      font-size: 3vw;
+    }
+    .sm-small-font {
+      font-size: 4vw;
+    }
   }
 }

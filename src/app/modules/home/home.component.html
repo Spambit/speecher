@@ -1,12 +1,12 @@
 <speecher-nav class='d-sm-block d-md-none' [config]='navConfig'></speecher-nav>
 <div class="d-flex flex-column flex-md-row justify-content-between speecher-home">
   <div class="jumbotron">
-    <div class="d-flex flex-row justify-content-start ml-0 mr-0 p-1">
+    <div class="speecher-welcome d-flex flex-row justify-content-start ml-0 mr-0 p-1">
       <img *ngIf="isLoggedIn" class="rounded mr-2 speecher-avatar" [src]="user.avatar">
       <h1 *ngIf="!isLoggedIn" class="display-4 text-yellow">Hello, <strong>Speecher!</strong></h1>
       <ul *ngIf="isLoggedIn" class="list-group list-group-flush speecher-user-info">
-        <li class="list-group-item text-yellow pt-0">{{user.name}}</li>
-        <li class="list-group-item">{{user.email}}</li>
+        <li class="d-inline-block list-group-item text-yellow pt-0"><a class='sm-small-font'>{{user.name}}</a></li>
+        <li class="list-group-item"><a class='sm-xx-small-font'>{{user.email}}</a></li>
       </ul>
     </div>
     <hr class="my-4">
