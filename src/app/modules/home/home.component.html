@@ -16,6 +16,7 @@
     <p *ngIf="!isLoggedIn">You should login to google to save notes for all your devices.
       Don't worry! We have access only to single folder in your google drive named <strong>Speecher-Data-Folder</strong>.
     </p>
+    <hr class="my-4">
     <p class="lead">
       <button *ngIf="!isLoggedIn" class="btn btn-success btn-lg" (click)="login()" role="button">Login</button>
       <button *ngIf="isLoggedIn" class="btn btn-success btn-lg" (click)="logout()" role="button">Logout</button>
