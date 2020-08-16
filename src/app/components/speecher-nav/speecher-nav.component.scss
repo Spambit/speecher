@@ -16,11 +16,14 @@
 }
 
 .dropdown-menu {
-  background-color: $gray-600;
+  background-color: rgba($color: $black, $alpha: 0.7);
+  color: $gray-400;
   .dropdown-item {
-    background-color: $gray-600;
+    background-color: rgba($color: $black, $alpha: 0.7);
+    color: $gray-500;
+    border-color: $gray-800;
     &:hover, &:focus {
-      background-color: $gray-700;
+      color: $white;
     }
   }
 }
