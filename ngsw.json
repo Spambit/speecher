@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1597576478057,
+  "timestamp": 1597576853662,
   "index": "https://spambit.github.io/speecher/index.html",
   "assetGroups": [
     {
@@ -8,8 +8,8 @@
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "urls": [
-        "https://spambit.github.io/speecher/1-es2015.b599d8b00ecabd29a1f7.js",
-        "https://spambit.github.io/speecher/1-es5.b599d8b00ecabd29a1f7.js",
+        "https://spambit.github.io/speecher/1-es2015.2a458ec36a9f37f71d49.js",
+        "https://spambit.github.io/speecher/1-es5.2a458ec36a9f37f71d49.js",
         "https://spambit.github.io/speecher/10-es2015.1901643da1cf859f8b72.js",
         "https://spambit.github.io/speecher/10-es5.1901643da1cf859f8b72.js",
         "https://spambit.github.io/speecher/3-es2015.16c97802845c6f4427b5.js",
@@ -27,8 +27,8 @@
         "https://spambit.github.io/speecher/manifest.webmanifest",
         "https://spambit.github.io/speecher/polyfills-es2015.7066185fcb8d95dd5933.js",
         "https://spambit.github.io/speecher/polyfills-es5.8f906e8378e01a59f130.js",
-        "https://spambit.github.io/speecher/runtime-es2015.7310627fd04dee079e03.js",
-        "https://spambit.github.io/speecher/runtime-es5.7310627fd04dee079e03.js",
+        "https://spambit.github.io/speecher/runtime-es2015.e98cc988a7a3370a8a27.js",
+        "https://spambit.github.io/speecher/runtime-es5.e98cc988a7a3370a8a27.js",
         "https://spambit.github.io/speecher/styles.397f1c0804278e20be87.css"
       ],
       "patterns": []
@@ -88,8 +88,8 @@
   ],
   "dataGroups": [],
   "hashTable": {
-    "https://spambit.github.io/speecher/1-es2015.b599d8b00ecabd29a1f7.js": "7a8315fc974819b4adeed368c5b8dc4a6ef4aae5",
-    "https://spambit.github.io/speecher/1-es5.b599d8b00ecabd29a1f7.js": "338038c1fc180b2f2cc2264542816cb66e8e4a08",
+    "https://spambit.github.io/speecher/1-es2015.2a458ec36a9f37f71d49.js": "b4e29b922bdf67e830066e9a3e72fa03d4460561",
+    "https://spambit.github.io/speecher/1-es5.2a458ec36a9f37f71d49.js": "b15aee6a2536308af0c195524e2f4367b65a750d",
     "https://spambit.github.io/speecher/10-es2015.1901643da1cf859f8b72.js": "5c43088db3f796ea39dea5f7635e1593d885dcaa",
     "https://spambit.github.io/speecher/10-es5.1901643da1cf859f8b72.js": "53944e7bf413b9ae2b240df10055672b4f88571a",
     "https://spambit.github.io/speecher/3-es2015.16c97802845c6f4427b5.js": "41403bfa3abe920e1576e6e411666aa5aaa3554e",
@@ -109,7 +109,7 @@
     "https://spambit.github.io/speecher/common-es2015.a3bec9fdc6081546e51f.js": "db7c085819896a9649defa50ea4ee4e2b802985a",
     "https://spambit.github.io/speecher/common-es5.a3bec9fdc6081546e51f.js": "3438853fb4b84eaf544a506501522da0bd01d2be",
     "https://spambit.github.io/speecher/favicon.ico": "22f6a4a3bcaafafb0254e0f2fa4ceb89e505e8b2",
-    "https://spambit.github.io/speecher/index.html": "5b606642c2d1a63b85293846303ca4a7db2b122d",
+    "https://spambit.github.io/speecher/index.html": "202d1ac11a8b92439e5171a225d0ee2851536a2e",
     "https://spambit.github.io/speecher/main-es2015.ee0b717b2364af2d1cce.js": "4e760887acc8be022c8c61e3350cd2f18a4b8ff3",
     "https://spambit.github.io/speecher/main-es5.ee0b717b2364af2d1cce.js": "07166b32c965fdd70d56b2e2b69862d3a7ae7bb5",
     "https://spambit.github.io/speecher/manifest.webmanifest": "9a36f93329b1cce7a5208bd296a2c5abb4c080f4",
@@ -151,8 +151,8 @@
     "https://spambit.github.io/speecher/montserrat-latin-900italic.efcaa0f6a82ee0640b83.woff": "cc1c3ab955d78072362ff20259f2895df5822631",
     "https://spambit.github.io/speecher/polyfills-es2015.7066185fcb8d95dd5933.js": "aed015d92015f3555f66f029125a722845d8f18d",
     "https://spambit.github.io/speecher/polyfills-es5.8f906e8378e01a59f130.js": "4f91d7c48c2bdaf890bcbfc0b1604747862469c9",
-    "https://spambit.github.io/speecher/runtime-es2015.7310627fd04dee079e03.js": "261b8a12c43e07825fe6a1868f909d023a668766",
-    "https://spambit.github.io/speecher/runtime-es5.7310627fd04dee079e03.js": "c6b208ac97955102ced284e368240e1af9ce2965",
+    "https://spambit.github.io/speecher/runtime-es2015.e98cc988a7a3370a8a27.js": "64478ab2416a439dcc9758f77d1785ff40a8d87f",
+    "https://spambit.github.io/speecher/runtime-es5.e98cc988a7a3370a8a27.js": "d403afded4c0496e03646e03ae1e676d97ee9e84",
     "https://spambit.github.io/speecher/styles.397f1c0804278e20be87.css": "eccdc15291bbd934cd3fb933ecfabfb6c5212ec9"
   },
   "navigationUrls": [
