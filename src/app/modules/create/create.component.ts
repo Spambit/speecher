@@ -125,6 +125,7 @@ export class CreateStoryComponent implements OnInit {
         },
         words: [],
       });
+    this.gdriveParentFolderId = this.noteNow.drive.destFolderId;
     this.noteSpeechResult.final = (this.noteNow && this.noteNow.note) || '';
     this.invalidateNoteTextArea(this.noteSpeechResult.final);
     this.recognizerService.events.subscribe(
@@ -188,7 +189,7 @@ export class CreateStoryComponent implements OnInit {
     this.wordPanelVisible = false;
   }
 
-  private findFolder({ id = '' }): Promise<boolean> {
+  private findFolder({ id = '' }): Promise<{IDs?: string[]}> {
     return this.driveService.findFile({ id });
   }
 
@@ -407,8 +408,8 @@ export class CreateStoryComponent implements OnInit {
   private saveNoteInGoogleDrive(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.findFolder({ id: this.gdriveParentFolderId }).then((found) => {
-        if (!found) {
-          console.log('Not found');
+        if (found.IDs.length === 0) {
+          console.log('Not found base follder');
           return this.driveService
             .createBaseFolder()
             .then((ret) => {
@@ -419,8 +420,8 @@ export class CreateStoryComponent implements OnInit {
             })
             .catch(reject);
         }
-        console.log('found');
-        return this.saveNoteInternal(this.gdriveParentFolderId)
+        console.log('Found base folder');
+        return this.saveNoteInternal(found.IDs[0])
           .then(resolve)
           .catch(reject);
       });
@@ -433,9 +434,7 @@ export class CreateStoryComponent implements OnInit {
         withContent: JSON.stringify(this.noteNow),
         name: this.today,
         folderId: parentFolderId,
-      })
-      .then((res) => Promise.resolve())
-      .catch(Promise.reject);
+      });
   }
 
   private onTextChangeInWordPanel(event: Event) {
@@ -443,6 +442,12 @@ export class CreateStoryComponent implements OnInit {
   }
 
   toggleStart() {
+    this.started = !this.started;
+    this.saveNoteInGoogleDrive()
+        .then(() => console.log('Note saved in drive'))
+        .catch(console.error);
+    return;
+
     if (this.started) {
       this.stop();
       return;

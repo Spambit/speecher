@@ -19,30 +19,64 @@ export class DriveService {
   };
   constructor(private loginService: LoginService) {}
   createBaseFolder(name?: string): Promise<{ id?: string }> {
-    return this.loadGoogleDrive().then(() =>
-      this.createFolderInternal({ name })
-    );
+    return new Promise((resolve, reject) => {
+      this.loadGoogleDrive()
+        .then(() => {
+          return this.findFile({ name });
+        })
+        .then(found => {
+          if (found.IDs.length === 0) {
+            this.createFolderInternal({ name }).then(resolve);
+          }
+          return resolve({id: found.IDs[0]});
+        })
+        .catch(reject);
+    });
   }
 
   isLoggedIn() {
     return this.loginService.isLoggedIn({ forScope: this.loginOptions.scope });
   }
 
-  findFile({ id }: { id: string }): Promise<boolean> {
-    return this.loadGoogleDrive().then(() => {
-      return gapi.client.drive.files
-        .list({
+  findFile({
+    id,
+    name,
+  }: {
+    id?: string;
+    name?: string;
+  }): Promise<{ IDs?: string[] }> {
+    let query = '';
+    if (name) {
+      query = `name = '${name}'`;
+    } else if (id) {
+      query = `'${id}' in parents`;
+    }
+
+    return new Promise<{ IDs?: string[] }>((resolve, reject) => {
+      this.loadGoogleDrive()
+      .then(() => {
+        return gapi.client.drive.files.list({
           // tslint:disable-next-line: quotemark
-          q: `'${id}' in parents`,
+          q: query,
           fields: 'nextPageToken, files(id, name)',
-          spaces: 'drive'
-        })
-        .then((res) => (res.status === 200 ? true : false))
-        .catch(() => false);
+          spaces: 'drive',
+        });
+      })
+      .then((res) => {
+        const files = res.result && res.result.files ? res.result.files : [];
+        const fileIds: string[] = files.map((file) => file.id);
+        return fileIds;
+      }).
+      then(fileIds => {
+        resolve({IDs : fileIds});
+      })
+      .catch(() => {
+        return [];
+      });
     });
   }
 
-  login(): Promise<void>{
+  login(): Promise<void> {
     return this.loadGoogleDrive();
   }
 
@@ -108,11 +142,50 @@ export class DriveService {
     return this.loginService.logout();
   }
 
-  createFile({ name, withContent, folderId }: {name: string, withContent: any, folderId: string}): Promise<void> {
-    return this.createFileWithJSONContent({name, data : JSON.stringify(withContent), folderId});
+  createFile({
+    name,
+    withContent,
+    folderId,
+    fileId
+  }: {
+    name: string;
+    withContent: any;
+    folderId?: string;
+    fileId?: string;
+  }): Promise<void> {
+    return this.findFile({ name }).then((found) => {
+      if (found.IDs.length !== 0) {
+        return this.createFileWithJSONContent({
+          name,
+          data: JSON.stringify(withContent),
+          fileId,
+          update: true,
+        }).catch(() => console.log('Error: error updating file.'));
+      }
+      return this.createFileWithJSONContent({
+        name,
+        data: JSON.stringify(withContent),
+        parentFolderId: folderId,
+        update: false,
+      }).catch((e) => {
+        console.log('Error: error creating file.');
+      });
+    });
   }
 
-  private createFileWithJSONContent({ name, data, folderId }: {name: string, data: string, folderId: string}): Promise<void> {
+  private createFileWithJSONContent({
+    name,
+    data,
+    parentFolderId,
+    update,
+    fileId
+  }: {
+    update: boolean;
+    name: string;
+    data: string;
+    parentFolderId?: string;
+    fileId?: string;
+  }): Promise<void> {
     return new Promise((resolve, reject) => {
       const boundary = '-------speecher-boundary';
       const delimiter = '\r\n--' + boundary + '\r\n';
@@ -120,11 +193,13 @@ export class DriveService {
 
       const contentType = 'application/json';
 
-      const metadata = {
+      const metadata: any = {
         name,
         mimeType: contentType,
-        parents: [folderId]
       };
+      if (parentFolderId) {
+        metadata.parents = [parentFolderId];
+      }
 
       const multipartRequestBody =
         delimiter +
@@ -137,16 +212,17 @@ export class DriveService {
         data +
         closeDelim;
 
+      const urlPath = fileId ? `/upload/drive/v3/files/${fileId}` : `/upload/drive/v3/files`;
       const request = gapi.client.request({
-        path: '/upload/drive/v3/files',
-        method: 'POST',
+        path: urlPath,
+        method: !update ? 'POST' : 'PUT',
         params: { uploadType: 'multipart' },
         headers: {
           'Content-Type': 'multipart/related; boundary="' + boundary + '"',
         },
         body: multipartRequestBody,
       });
-      request.execute((_ , res) => {
+      request.execute((_, res) => {
         if (res.status !== 200) {
           return reject();
         }
