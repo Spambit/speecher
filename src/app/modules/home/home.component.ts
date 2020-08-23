@@ -5,7 +5,6 @@ import { LoginService } from '@services/login.service';
 import { DriveService } from '@services/drive.service';
 import { ToastService } from '@services/toast.service';
 import { NavConfig, NavDropDownItem } from '@components/speecher-nav/speecher-nav.component';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'speecher-home',

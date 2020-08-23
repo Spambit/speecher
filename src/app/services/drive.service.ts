@@ -26,7 +26,7 @@ export class DriveService {
         })
         .then(found => {
           if (found.IDs.length === 0) {
-            this.createFolderInternal({ name }).then(resolve);
+            return this.createFolderInternal({ name }).then(resolve);
           }
           return resolve({id: found.IDs[0]});
         })
@@ -152,23 +152,29 @@ export class DriveService {
     withContent: any;
     folderId?: string;
     fileId?: string;
-  }): Promise<void> {
-    return this.findFile({ name }).then((found) => {
-      if (found.IDs.length !== 0) {
+  }): Promise<{id: string}> {
+    return new Promise((resolve, reject) => {
+      this.findFile({ name }).then((found) => {
+        if (found.IDs.length !== 0) {
+          return this.createFileWithJSONContent({
+            name,
+            data: JSON.stringify(withContent),
+            fileId,
+            update: true,
+          }).then((val) => resolve(val)).catch(() => {
+            console.log('Error: error updating file.');
+            reject();
+          });
+        }
         return this.createFileWithJSONContent({
           name,
           data: JSON.stringify(withContent),
-          fileId,
-          update: true,
-        }).catch(() => console.log('Error: error updating file.'));
-      }
-      return this.createFileWithJSONContent({
-        name,
-        data: JSON.stringify(withContent),
-        parentFolderId: folderId,
-        update: false,
-      }).catch((e) => {
-        console.log('Error: error creating file.');
+          parentFolderId: folderId,
+          update: false,
+        }).then((val) => resolve(val)).catch(() => {
+          console.log('Error: error creating file.');
+          reject();
+        });
       });
     });
   }
@@ -185,7 +191,7 @@ export class DriveService {
     data: string;
     parentFolderId?: string;
     fileId?: string;
-  }): Promise<void> {
+  }): Promise<{id: string}> {
     return new Promise((resolve, reject) => {
       const boundary = '-------speecher-boundary';
       const delimiter = '\r\n--' + boundary + '\r\n';
@@ -201,6 +207,8 @@ export class DriveService {
         metadata.parents = [parentFolderId];
       }
 
+      console.log(`creating file in folder id: ${parentFolderId}`);
+
       const multipartRequestBody =
         delimiter +
         'Content-Type: application/json\r\n\r\n' +
@@ -215,18 +223,18 @@ export class DriveService {
       const urlPath = fileId ? `/upload/drive/v3/files/${fileId}` : `/upload/drive/v3/files`;
       const request = gapi.client.request({
         path: urlPath,
-        method: !update ? 'POST' : 'PUT',
+        method: !update ? 'POST' : 'PATCH',
         params: { uploadType: 'multipart' },
         headers: {
           'Content-Type': 'multipart/related; boundary="' + boundary + '"',
         },
         body: multipartRequestBody,
       });
-      request.execute((_, res) => {
-        if (res.status !== 200) {
+      request.execute((file) => {
+        if (!file){
           return reject();
         }
-        resolve();
+        return resolve({id: file.id});
       });
     });
   }

@@ -409,26 +409,27 @@ export class CreateStoryComponent implements OnInit {
     return new Promise((resolve, reject) => {
       this.findFolder({ id: this.gdriveParentFolderId }).then((found) => {
         if (found.IDs.length === 0) {
-          console.log('Not found base follder');
+          console.log('Not found base folder');
           return this.driveService
             .createBaseFolder()
             .then((ret) => {
               this.gdriveParentFolderId = ret.id;
+              console.log(`Base folder created with id: ${this.gdriveParentFolderId}`);
               this.saveNoteInternal(this.gdriveParentFolderId)
-                .then(resolve)
+                .then(() => resolve())
                 .catch(reject);
             })
             .catch(reject);
         }
-        console.log('Found base folder');
+        console.log(`Found base folder : ${found.IDs[0]} ++++++ ${this.gdriveParentFolderId}`);
         return this.saveNoteInternal(found.IDs[0])
-          .then(resolve)
+          .then(() => resolve())
           .catch(reject);
       });
     });
   }
 
-  private saveNoteInternal(parentFolderId: string): Promise<void> {
+  private saveNoteInternal(parentFolderId: string): Promise<{id: string}> {
     return this.driveService
       .createFile({
         withContent: JSON.stringify(this.noteNow),
