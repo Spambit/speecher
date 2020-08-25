@@ -13,9 +13,6 @@ export interface ICommand {
 export class Note {
   note: string;
   when: string;
-  drive: {
-    destFolderId: string;
-  };
   name: string;
   words: IWord[];
 }

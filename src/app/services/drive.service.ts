@@ -3,12 +3,13 @@ import { LoginService } from './login.service';
 import { first } from 'rxjs/operators';
 import { environment } from '../environments/env';
 import { Observable } from 'rxjs';
-import { rejects } from 'assert';
+import { rejects, strict } from 'assert';
 
 declare var gapi: any;
 
 @Injectable({ providedIn: 'root' })
 export class DriveService {
+  static readonly defaultFolderName = 'Speecher-Data-Folder';
   private loginOptions = {
     key: environment.drive_api_key,
     clientId: environment.drive_client_id,
@@ -24,11 +25,11 @@ export class DriveService {
         .then(() => {
           return this.findFile({ name });
         })
-        .then(found => {
+        .then((found) => {
           if (found.IDs.length === 0) {
             return this.createFolderInternal({ name }).then(resolve);
           }
-          return resolve({id: found.IDs[0]});
+          return resolve({ id: found.IDs[0] });
         })
         .catch(reject);
     });
@@ -36,6 +37,99 @@ export class DriveService {
 
   isLoggedIn() {
     return this.loginService.isLoggedIn({ forScope: this.loginOptions.scope });
+  }
+  /**
+   * Retrieve a list of files belonging to a folder.
+   *
+   * @param folderId ID of the folder to retrieve files from.
+   * @param callback Function to call when the request is complete.
+   *
+   */
+  private allFilesInFolder(
+    folderId: string,
+    callback: (files: { id: string, mimeType: string, name: string }[]) => void
+  ) {
+    const retrievePageOfChildren = (request, result: { id: string, mimeType: string, name: string }[]) => {
+      request.execute((resp) => {
+        result = result.concat(resp.files);
+        const nextPageToken = resp.nextPageToken;
+        if (nextPageToken) {
+          request = gapi.client.drive.files.list({
+            folderId,
+            pageToken: nextPageToken,
+          });
+          retrievePageOfChildren(request, result);
+        } else {
+          callback(result);
+        }
+      });
+    };
+    const initialRequest = gapi.client.drive.files.list({
+      folderId
+    });
+    retrievePageOfChildren(initialRequest, []);
+  }
+
+  fileContent(fileId: string): Promise<{id: string, description: string, content: string, title: string, mimeType: string}> {
+    return new Promise((resolve) => {
+      const request = (gapi.client as any).drive.files.get({
+        fileId,
+      });
+      request.execute((file) => {
+        this.downloadFile(file, (jsonAsString: string) => {
+          if (!jsonAsString){
+            return resolve();
+          }
+          resolve({
+            id: fileId,
+            content: jsonAsString,
+            description: file.description,
+            title: file.title,
+            mimeType: file.mimeType
+          });
+        });
+      });
+    });
+  }
+
+  /**
+   * Download a file's content.
+   *
+   * @param file Drive File instance.
+   * @param callback Function to call when the request is complete.
+   */
+  private downloadFile(file, callback: (str: string) => void) {
+    if (file.downloadUrl) {
+      const accessToken = gapi.auth.getToken().access_token;
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', file.downloadUrl);
+      xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+      xhr.onload = () => {
+        callback(xhr.responseText);
+      };
+      xhr.onerror = () => {
+        callback(null);
+      };
+      xhr.send();
+    } else {
+      callback(null);
+    }
+  }
+
+  allFilesInBaseFolder(): Promise<{ id: string }[]> {
+    return new Promise((resolve, reject) => {
+      this.findFile({name: DriveService.defaultFolderName}).then((folder) => {
+        if (folder.IDs.length !== 0) {
+          return folder.IDs[0];
+        }
+        return '';
+       }).then(id => {
+         if (id === ''){
+           return [];
+         }
+         return this.allFilesInFolder(id, resolve);
+       }).catch(reject);
+    });
   }
 
   findFile({
@@ -54,25 +148,25 @@ export class DriveService {
 
     return new Promise<{ IDs?: string[] }>((resolve, reject) => {
       this.loadGoogleDrive()
-      .then(() => {
-        return gapi.client.drive.files.list({
-          // tslint:disable-next-line: quotemark
-          q: query,
-          fields: 'nextPageToken, files(id, name)',
-          spaces: 'drive',
+        .then(() => {
+          return gapi.client.drive.files.list({
+            // tslint:disable-next-line: quotemark
+            q: query,
+            fields: 'nextPageToken, files(id, name)',
+            spaces: 'drive',
+          });
+        })
+        .then((res) => {
+          const files = res.result && res.result.files ? res.result.files : [];
+          const fileIds: string[] = files.map((file) => file.id);
+          return fileIds;
+        })
+        .then((fileIds) => {
+          resolve({ IDs: fileIds });
+        })
+        .catch(() => {
+          return [];
         });
-      })
-      .then((res) => {
-        const files = res.result && res.result.files ? res.result.files : [];
-        const fileIds: string[] = files.map((file) => file.id);
-        return fileIds;
-      }).
-      then(fileIds => {
-        resolve({IDs : fileIds});
-      })
-      .catch(() => {
-        return [];
-      });
     });
   }
 
@@ -109,7 +203,7 @@ export class DriveService {
   }
 
   private createFolderInternal({
-    name = 'Speecher-Data-Folder',
+    name = DriveService.defaultFolderName,
   }): Promise<{ id?: string }> {
     const fileMetadata = {
       name,
@@ -146,35 +240,37 @@ export class DriveService {
     name,
     withContent,
     folderId,
-    fileId
   }: {
     name: string;
     withContent: any;
     folderId?: string;
-    fileId?: string;
-  }): Promise<{id: string}> {
+  }): Promise<{ id: string }> {
     return new Promise((resolve, reject) => {
       this.findFile({ name }).then((found) => {
         if (found.IDs.length !== 0) {
           return this.createFileWithJSONContent({
             name,
             data: JSON.stringify(withContent),
-            fileId,
+            fileId: found.IDs[0],
             update: true,
-          }).then((val) => resolve(val)).catch(() => {
-            console.log('Error: error updating file.');
-            reject();
-          });
+          })
+            .then((val) => resolve(val))
+            .catch(() => {
+              console.log('Error: error updating file.');
+              reject();
+            });
         }
         return this.createFileWithJSONContent({
           name,
           data: JSON.stringify(withContent),
           parentFolderId: folderId,
           update: false,
-        }).then((val) => resolve(val)).catch(() => {
-          console.log('Error: error creating file.');
-          reject();
-        });
+        })
+          .then((val) => resolve(val))
+          .catch(() => {
+            console.log('Error: error creating file.');
+            reject();
+          });
       });
     });
   }
@@ -184,14 +280,14 @@ export class DriveService {
     data,
     parentFolderId,
     update,
-    fileId
+    fileId,
   }: {
     update: boolean;
     name: string;
     data: string;
     parentFolderId?: string;
     fileId?: string;
-  }): Promise<{id: string}> {
+  }): Promise<{ id: string }> {
     return new Promise((resolve, reject) => {
       const boundary = '-------speecher-boundary';
       const delimiter = '\r\n--' + boundary + '\r\n';
@@ -206,8 +302,11 @@ export class DriveService {
       if (parentFolderId) {
         metadata.parents = [parentFolderId];
       }
-
-      console.log(`creating file in folder id: ${parentFolderId}`);
+      if (fileId) {
+        console.log(`Updating file in folder id: ${fileId}`);
+      } else {
+        console.log(`Creating file in folder id: ${parentFolderId}`);
+      }
 
       const multipartRequestBody =
         delimiter +
@@ -220,7 +319,9 @@ export class DriveService {
         data +
         closeDelim;
 
-      const urlPath = fileId ? `/upload/drive/v3/files/${fileId}` : `/upload/drive/v3/files`;
+      const urlPath = fileId
+        ? `/upload/drive/v3/files/${fileId}`
+        : `/upload/drive/v3/files`;
       const request = gapi.client.request({
         path: urlPath,
         method: !update ? 'POST' : 'PATCH',
@@ -231,10 +332,10 @@ export class DriveService {
         body: multipartRequestBody,
       });
       request.execute((file) => {
-        if (!file){
+        if (!file) {
           return reject();
         }
-        return resolve({id: file.id});
+        return resolve({ id: file.id });
       });
     });
   }

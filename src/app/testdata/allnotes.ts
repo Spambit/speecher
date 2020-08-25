@@ -8,9 +8,6 @@ export class MockData {
       notes.push(
         createInstanceOfClass(Note, {
           when: '20-8-2020',
-          drive: {
-            destFolderId: 'drive-dest-folder',
-          },
           words: [
             {
               name: 'Go',

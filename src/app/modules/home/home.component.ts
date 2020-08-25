@@ -1,10 +1,20 @@
-import { Component, OnInit, HostListener, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import * as AppRoutes from '../../routes';
 import { LoginService } from '@services/login.service';
 import { DriveService } from '@services/drive.service';
 import { ToastService } from '@services/toast.service';
-import { NavConfig, NavDropDownItem } from '@components/speecher-nav/speecher-nav.component';
+import {
+  NavConfig,
+} from '@components/speecher-nav/speecher-nav.component';
+import { findReadVarNames } from '@angular/compiler/src/output/output_ast';
+import { createInstanceOfClass } from 'src/app/utils';
+import { Note } from '@services/filter.result';
+import { LocalStorageService, StoreType } from '@services/store.service';
 
 @Component({
   selector: 'speecher-home',
@@ -15,7 +25,7 @@ export class HomeComponent implements OnInit {
   constructor(
     private router: Router,
     private driveService: DriveService,
-    private toastService: ToastService,
+    private storeService: LocalStorageService,
     private loginService: LoginService,
     private cd: ChangeDetectorRef
   ) {}
@@ -56,8 +66,12 @@ export class HomeComponent implements OnInit {
         {
           text: `A Random Sweet Old Day`,
           click: (e, item) => {},
-        }
-      ]
+        },
+        {
+          text: `Sync`,
+          click: (e, item) => this.getDriveFilesToLocalStorage(),
+        },
+      ],
     },
   };
   ngOnInit() {
@@ -65,7 +79,7 @@ export class HomeComponent implements OnInit {
       next: (loggedIn) => {
         if (loggedIn) {
           this.loginSuccess();
-        }else {
+        } else {
           this.loggedOut();
         }
       },
@@ -75,11 +89,24 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  createTodaysNote() {
+  private async getDriveFilesToLocalStorage() {
+    const files = await this.driveService.allFilesInBaseFolder();
+    if (files.length !== 0) {
+      for (const file of files) {
+        const driveFile = await this.driveService.fileContent(file.id);
+        if (driveFile){
+          const note = JSON.parse(driveFile.content) as Note;
+          this.storeService.store(note, note.name, StoreType.note);
+        }
+      }
+    }
+  }
+
+  private createTodaysNote() {
     this.router.navigate([AppRoutes.names.write]);
   }
 
-  showAllNotes() {
+  private showAllNotes() {
     this.router.navigate([AppRoutes.names.read]);
   }
 
