@@ -66,9 +66,9 @@ export class AllNotesComponent implements OnInit {
       for (const file of files) {
         const driveFile = await this.driveService.fileContent(file.id);
         if (driveFile) {
-          const storeFiles = this.storeService.allNotes<Note>();
+          const storeFiles = await this.storeService.allNotes<Note>();
           const note = JSON.parse(driveFile.content) as Note;
-          const index = (await storeFiles).findIndex(
+          const index = storeFiles.findIndex(
             (item) => item.name === note.name
           );
           if (index === -1) {
@@ -77,6 +77,7 @@ export class AllNotesComponent implements OnInit {
         }
       }
     }
+    this.showAlert('warning', 'Notes from your google drive were synced.');
   }
 
   closeAlert(alert: IAlert) {
