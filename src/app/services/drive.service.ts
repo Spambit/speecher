@@ -55,8 +55,9 @@ export class DriveService {
         const nextPageToken = resp.nextPageToken;
         if (nextPageToken) {
           request = gapi.client.drive.files.list({
-            folderId,
+            q: 	`${folderId} in parents and trashed = false`,
             pageToken: nextPageToken,
+            fields: '*'
           });
           retrievePageOfChildren(request, result);
         } else {
@@ -65,55 +66,26 @@ export class DriveService {
       });
     };
     const initialRequest = gapi.client.drive.files.list({
-      folderId
+      q: `'${folderId}' in parents and trashed = false`,
+      fields: 'nextPageToken, files(id, name)',
+      spaces: 'drive',
     });
     retrievePageOfChildren(initialRequest, []);
   }
 
-  fileContent(fileId: string): Promise<{id: string, description: string, content: string, title: string, mimeType: string}> {
-    return new Promise((resolve) => {
+  fileContent(fileId: string): Promise<{content: string}> {
+    return new Promise((resolve, reject) => {
       const request = (gapi.client as any).drive.files.get({
         fileId,
+        alt: 'media',
       });
-      request.execute((file) => {
-        this.downloadFile(file, (jsonAsString: string) => {
-          if (!jsonAsString){
-            return resolve();
+      request.execute((content: any) => {
+          if (content.error) {
+            reject();
           }
-          resolve({
-            id: fileId,
-            content: jsonAsString,
-            description: file.description,
-            title: file.title,
-            mimeType: file.mimeType
-          });
-        });
+          resolve({ content });
       });
     });
-  }
-
-  /**
-   * Download a file's content.
-   *
-   * @param file Drive File instance.
-   * @param callback Function to call when the request is complete.
-   */
-  private downloadFile(file, callback: (str: string) => void) {
-    if (file.downloadUrl) {
-      const accessToken = gapi.auth.getToken().access_token;
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', file.downloadUrl);
-      xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-      xhr.onload = () => {
-        callback(xhr.responseText);
-      };
-      xhr.onerror = () => {
-        callback(null);
-      };
-      xhr.send();
-    } else {
-      callback(null);
-    }
   }
 
   allFilesInBaseFolder(): Promise<{ id: string }[]> {
@@ -141,9 +113,9 @@ export class DriveService {
   }): Promise<{ IDs?: string[] }> {
     let query = '';
     if (name) {
-      query = `name = '${name}'`;
+      query = `name = '${name}' and trashed = false`;
     } else if (id) {
-      query = `'${id}' in parents`;
+      query = `'${id}' in parents and trashed = false`;
     }
 
     return new Promise<{ IDs?: string[] }>((resolve, reject) => {

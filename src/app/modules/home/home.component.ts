@@ -66,11 +66,7 @@ export class HomeComponent implements OnInit {
         {
           text: `A Random Sweet Old Day`,
           click: (e, item) => {},
-        },
-        {
-          text: `Sync`,
-          click: (e, item) => this.getDriveFilesToLocalStorage(),
-        },
+        }
       ],
     },
   };
@@ -87,19 +83,6 @@ export class HomeComponent implements OnInit {
         this.loginFail(err);
       },
     });
-  }
-
-  private async getDriveFilesToLocalStorage() {
-    const files = await this.driveService.allFilesInBaseFolder();
-    if (files.length !== 0) {
-      for (const file of files) {
-        const driveFile = await this.driveService.fileContent(file.id);
-        if (driveFile){
-          const note = JSON.parse(driveFile.content) as Note;
-          this.storeService.store(note, note.name, StoreType.note);
-        }
-      }
-    }
   }
 
   private createTodaysNote() {

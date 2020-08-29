@@ -73,3 +73,8 @@ export interface IAccordianContext {
   };
 }
 
+export interface IAlert {
+  type: 'success' | 'info' | 'primary' | 'secondary' | 'light' | 'warning' | 'dark';
+  message: string;
+}
+

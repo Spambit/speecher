@@ -1,4 +1,7 @@
 <speecher-nav [config]="navConfig"></speecher-nav>
+<p class="fixed-bottom m-2" *ngFor="let alert of alerts">
+  <ngb-alert class="border-0" [dismissible]="false" [type]="alert.type" (close)="closeAlert(alert)">{{ alert.message }}</ngb-alert>
+</p>
 <div class="all-notes-container">
   <ngb-accordion #acc="ngbAccordion">
     <ng-template ngFor let-item [ngForOf]="notes" let-i="index" [ngForTrackBy]="identify">

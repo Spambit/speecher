@@ -18,6 +18,7 @@ import { LocalStorageService } from '@services/store.service';
 import { DateService } from '@services/date.service';
 import { DriveService } from '@services/drive.service';
 import { ToastService } from '@services/toast.service';
+import { NoteService } from '@services/note.service';
 import { SpeakService } from '@services/speak.service';
 import { createInstanceOfClass } from 'src/app/utils';
 import { NavConfig } from '@components/speecher-nav/speecher-nav.component';
@@ -37,11 +38,11 @@ export class CreateStoryComponent implements OnInit {
     private commandService: CommandService,
     private storeService: LocalStorageService,
     private dateService: DateService,
-    private driveService: DriveService,
     private toastService: ToastService,
     private templateService: TemplateService,
     private viewRef: ViewContainerRef,
-    private speakService: SpeakService
+    private speakService: SpeakService,
+    private noteService: NoteService,
   ) {}
   private mutableWordPanelData = this.immutableWordPanelData;
   private intrimPrefix = 'intrim::';
@@ -184,10 +185,6 @@ export class CreateStoryComponent implements OnInit {
     this.wordPanelVisible = false;
   }
 
-  private findFolder({ name = '' }): Promise<{IDs?: string[]}> {
-    return this.driveService.findFile({ name });
-  }
-
   private processResult(result: {
     speech: string;
     confidence: any;
@@ -296,7 +293,7 @@ export class CreateStoryComponent implements OnInit {
         console.log('Data stored.');
       });
     if (processedResult.shouldSaveNote) {
-      this.saveNoteInGoogleDrive()
+      this.noteService.saveNoteInGoogleDrive(this.noteNow)
         .then(() => console.log('Note saved in drive'))
         .catch(console.error);
     }
@@ -398,38 +395,6 @@ export class CreateStoryComponent implements OnInit {
       shouldSaveNote,
       shouldShowCreateWordPanel,
     };
-  }
-
-  private saveNoteInGoogleDrive(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.findFolder({ name: DriveService.defaultFolderName }).then((found) => {
-        if (found.IDs.length === 0) {
-          console.log('Not found base folder');
-          return this.driveService
-            .createBaseFolder()
-            .then((ret) => {
-              console.log(`Base folder created with id: ${ret.id}`);
-              this.saveNoteInternal(ret.id)
-                .then(() => resolve())
-                .catch(reject);
-            })
-            .catch(reject);
-        }
-        console.log(`Found base folder : ${found.IDs[0]}`);
-        return this.saveNoteInternal(found.IDs[0])
-          .then(() => resolve())
-          .catch(reject);
-      });
-    });
-  }
-
-  private saveNoteInternal(parentFolderId: string): Promise<{id: string}> {
-    return this.driveService
-      .createFile({
-        withContent: JSON.stringify(this.noteNow),
-        name: this.today,
-        folderId: parentFolderId,
-      });
   }
 
   private onTextChangeInWordPanel(event: Event) {
