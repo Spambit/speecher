@@ -2,6 +2,8 @@ import {
   Component,
   OnInit,
   ChangeDetectorRef,
+  OnChanges,
+  NgZone,
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import * as AppRoutes from '../../routes';
@@ -11,10 +13,6 @@ import { ToastService } from '@services/toast.service';
 import {
   NavConfig,
 } from '@components/speecher-nav/speecher-nav.component';
-import { findReadVarNames } from '@angular/compiler/src/output/output_ast';
-import { createInstanceOfClass } from 'src/app/utils';
-import { Note } from '@services/filter.result';
-import { LocalStorageService, StoreType } from '@services/store.service';
 
 @Component({
   selector: 'speecher-home',
@@ -25,7 +23,6 @@ export class HomeComponent implements OnInit {
   constructor(
     private router: Router,
     private driveService: DriveService,
-    private storeService: LocalStorageService,
     private loginService: LoginService,
     private cd: ChangeDetectorRef
   ) {}
@@ -104,18 +101,17 @@ export class HomeComponent implements OnInit {
   loginSuccess() {
     this.isLoggedIn = true;
     this.user = this.loginService.getUserInfo();
-    this.cd.detectChanges();
+    setTimeout(() => this.cd.detectChanges(), 500);
   }
 
   loginFail(err: any) {
     this.isLoggedIn = false;
     this.user = {};
-    this.cd.detectChanges();
   }
 
   loggedOut() {
     this.isLoggedIn = false;
     this.user = {};
-    this.cd.detectChanges();
+    setTimeout(() => this.cd.detectChanges(), 500);
   }
 }
