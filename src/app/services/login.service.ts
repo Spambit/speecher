@@ -47,20 +47,11 @@ export class LoginService {
   }
 
   private loadGoogleApi() {
-    if (this.alreadyGoogleApiLoaded()){
-      this.googleApiDidLoad();
-      return;
-    }
     const gapiUrl = 'https://apis.google.com/js/api.js';
     const script = document.createElement('script');
     script.addEventListener('load', () => this.googleApiDidLoad());
     script.setAttribute('src', gapiUrl);
     document.body.appendChild(script);
-  }
-
-  private alreadyGoogleApiLoaded() {
-    const scripts = Array.prototype.slice.call(document.getElementsByTagName('script')) as HTMLScriptElement[];
-    return scripts.some(item => item.src === 'https://apis.google.com/js/api.js');
   }
 
   isLoggedIn({ forScope = '' }): boolean {
@@ -102,9 +93,6 @@ export class LoginService {
     clientId = '',
     discoveryDocs = ([] = ['']),
   }): Observable<boolean> {
-    // setTimeout(() => { this.login$.next(true); }, 1000);
-    // return;
-
     this.initClient({ scope, apiKey: key, clientId, discoveryDocs })
       .then((_) => {
         if (this.googleAuth.isSignedIn.get()) {
@@ -124,9 +112,6 @@ export class LoginService {
     return this.login$;
   }
   public logout(): Observable<boolean> {
-    // setTimeout(() => { this.login$.next(false); }, 1000);
-    // return;
-
     if (!this.googleAuth) {
       this.throwDeferedError('Google Auth was not loaded.');
     } else if (!this.googleAuth.isSignedIn.get()) {
